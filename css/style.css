@@ -1,0 +1,358 @@
+:root {
+  --bio-green: #45ec09;
+  --bio-green-dark: #249901;
+  --tech-blue: #0945ec;
+  --tech-blue-dark: #052cb2;
+  --alert-pink: #ec0945;
+  --bg-cream: #f4faea;
+  --text-dark: #1b2613;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  font-family: system-ui, -apple-system, 'Nunito', 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  background-color: #12190e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* =========================================================================
+   МОБИЛЬНАЯ ВЕРСИЯ (ВЕРТИКАЛЬ 9:16)
+   Чёткая очередность: Вывеска -> Флори по центру -> Кнопки внизу
+========================================================================= */
+.app-viewport {
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--bg-cream);
+  background-image: url('../assets/samples/bg_menu.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.screen {
+  width: 100%;
+  height: 100%;
+  display: none;
+  position: relative;
+}
+
+.screen.active {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px 18px;
+}
+
+/* 1. Вывеска сверху на мобилке */
+.logo-zone {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 4px;
+  z-index: 5;
+}
+
+.main-logo-img {
+  width: 74%;
+  max-width: 250px;
+  max-height: 16vh;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.18));
+  transform: rotate(-1.5deg);
+}
+
+.logo-fallback {
+  display: none;
+  background: #ffffff;
+  border: 4px solid var(--bio-green);
+  border-radius: 18px;
+  padding: 8px 16px;
+  text-align: center;
+  box-shadow: 0 5px 0 var(--bio-green-dark);
+}
+.logo-fallback h1 {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--tech-blue);
+}
+.logo-fallback span {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #425832;
+}
+
+/* 2. Флори в центре на мобилке */
+.flori-stage {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 4;
+}
+
+.flori-hero-sprite {
+  width: 155px;
+  max-height: 36vh;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.22));
+  animation: floatHover 3.4s ease-in-out infinite;
+}
+
+@keyframes floatHover {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(2deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+/* 3. Кнопки и ввод строго внизу на мобилке */
+.menu-action-zone {
+  width: 100%;
+  max-width: 330px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 6;
+  margin-bottom: 4px;
+}
+
+.input-card {
+  background: rgba(255, 255, 255, 0.96);
+  border: 3px solid #cfe0c2;
+  border-radius: 16px;
+  padding: 6px 14px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.input-card label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 900;
+  color: #4b633b;
+  margin-bottom: 2px;
+  letter-spacing: 0.4px;
+}
+
+.input-card input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  outline: none;
+}
+
+.btn-primary-3d {
+  width: 100%;
+  background: var(--bio-green);
+  color: #0b3d00;
+  border: none;
+  border-radius: 16px;
+  padding: 13px 10px;
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 var(--bio-green-dark), 0 8px 16px rgba(69, 236, 9, 0.35);
+  transition: all 0.1s ease;
+}
+
+.btn-primary-3d:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 var(--bio-green-dark);
+}
+
+/* =========================================================================
+   МНОГОУРОВНЕВЫЙ МАРШРУТ РОБОТА-ПЫЛЕСОСА
+========================================================================= */
+.hills-vacuum-track {
+  position: absolute;
+  top: 60%;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  pointer-events: none;
+  z-index: 3;
+  overflow: hidden;
+}
+
+.vacuum-sprite {
+  width: 38px;
+  height: auto;
+  position: absolute;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.22));
+  animation: vacuumSmartPatrol 26s ease-in-out infinite;
+}
+
+/* Траектория со сменой высоты, направления и скоростей */
+@keyframes vacuumSmartPatrol {
+  /* 1. Едет направо по верхнему уровню */
+  0% {
+    left: -60px;
+    top: 6px;
+    transform: scaleX(1);
+  }
+  22% {
+    left: 105%;
+    top: 14px;
+    transform: scaleX(1);
+  }
+
+  /* Разворот у правого края */
+  23% {
+    left: 105%;
+    top: 36px;
+    transform: scaleX(-1);
+  }
+
+  /* 2. Едет обратно налево, но уже ниже по склону и чуть медленнее */
+  48% {
+    left: -60px;
+    top: 42px;
+    transform: scaleX(-1);
+  }
+
+  /* Разворот у левого края и подъем на средний уровень */
+  49% {
+    left: -60px;
+    top: 22px;
+    transform: scaleX(1);
+  }
+
+  /* 3. Едет направо по среднему уровню с легким спуском к концу */
+  72% {
+    left: 105%;
+    top: 28px;
+    transform: scaleX(1);
+  }
+
+  /* Разворот */
+  73% {
+    left: 105%;
+    top: 10px;
+    transform: scaleX(-1);
+  }
+
+  /* 4. Возвращается налево по верхнему уровню на исходную */
+  99% {
+    left: -60px;
+    top: 6px;
+    transform: scaleX(-1);
+  }
+  100% {
+    left: -60px;
+    top: 6px;
+    transform: scaleX(1);
+  }
+}
+
+/* =========================================================================
+   ПК И НОУТБУКИ (16:9)
+   Точно как на твоём скриншоте:
+   - Слева сверху: Вывеска
+   - Слева снизу: Ввод и Кнопка
+   - Справа: Парящий Флори
+========================================================================= */
+@media (min-width: 550px) {
+  .app-viewport {
+    background-image: url('../assets/samples/bg_menu2.png');
+  }
+}
+
+@media (min-width: 768px) and (min-aspect-ratio: 4/3) {
+  .app-viewport {
+    width: 95vw;
+    max-width: 1200px;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    max-height: 88vh;
+    border-radius: 28px;
+    border: 6px solid #142010;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+  }
+
+  .screen.active {
+    display: block; /* Абсолютное позиционирование для идеальной компоновки */
+    padding: 0;
+  }
+
+  /* 1. ВЫВЕСКА: СЛЕВА СВЕРХУ */
+  .logo-zone {
+    position: absolute;
+    top: 28px;
+    left: 45px;
+    width: auto;
+    margin-top: 0;
+    justify-content: flex-start;
+  }
+
+  .main-logo-img {
+    width: 320px;
+    max-height: none;
+    transform: rotate(-3deg);
+  }
+
+  /* 2. ВВОД И КНОПКА: СЛЕВА СНИЗУ (СТРОГО ПОД ВЫВЕСКОЙ) */
+  .menu-action-zone {
+    position: absolute;
+    bottom: 35px;
+    left: 45px;
+    width: 330px;
+    margin-bottom: 0;
+    gap: 10px;
+  }
+
+  .input-card {
+    padding: 8px 14px;
+  }
+  .input-card input {
+    font-size: 1.1rem;
+  }
+
+  .btn-primary-3d {
+    padding: 15px;
+    font-size: 1.15rem;
+  }
+
+  /* 3. ФЛОРИ: СПРАВА НАД ПОЛЯНОЙ */
+  .flori-stage {
+    position: absolute;
+    top: 50%;
+    right: 18%;
+    transform: translateY(-50%);
+    width: auto;
+    margin-top: 0;
+  }
+
+  .flori-hero-sprite {
+    width: 230px;
+    max-height: 58vh;
+    filter: drop-shadow(0 18px 26px rgba(0, 0, 0, 0.25));
+  }
+
+  /* 4. ПЫЛЕСОС НА ПК КРУПНЕЕ И С БОЛЬШИМ РАЗМАХОМ */
+  .hills-vacuum-track {
+    top: 66%;
+    height: 90px;
+  }
+
+  .vacuum-sprite {
+    width: 52px;
+  }
+}

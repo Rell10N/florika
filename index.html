@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Флорика — Спасение Мэйлии</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Главное окно игры -->
+  <div class="app-viewport">
+
+    <!-- ================= ЭКРАН 1: ГЛАВНОЕ МЕНЮ ================= -->
+    <section class="screen active" id="screen-menu">
+      
+      <!-- 1. Вывеска с логотипом (на ПК: слева сверху; на мобилке: сверху по центру) -->
+      <div class="logo-zone">
+        <img src="assets/samples/logo_banner.png" alt="Флорика" class="main-logo-img" id="logo-img" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
+        <div class="logo-fallback" id="logo-fallback">
+          <h1>ФЛОРИКА</h1>
+          <span>Спасение логики Мэйлии</span>
+        </div>
+      </div>
+
+      <!-- 2. Парящий Флори (на ПК: справа; на мобилке: по центру) -->
+      <div class="flori-stage">
+        <img src="assets/flori/flori_hello.png" alt="Флори приветствует" class="flori-hero-sprite">
+      </div>
+
+      <!-- 3. Робот-пылесос с живым маршрутом по поляне -->
+      <div class="hills-vacuum-track">
+        <img src="assets/samples/toy_vacuum.png" alt="Робот-пылесос" class="vacuum-sprite" id="vacuum-img" onerror="this.style.display='none';">
+      </div>
+
+      <!-- 4. Ввод имени и кнопка (на ПК: слева внизу под вывеской; на мобилке: строго внизу) -->
+      <div class="menu-action-zone">
+        <div class="input-card">
+          <label for="player-name-input">ИМЯ ИССЛЕДОВАТЕЛЯ:</label>
+          <input type="text" id="player-name-input" placeholder="Введи своё имя..." maxlength="15" autocomplete="off">
+        </div>
+
+        <button class="btn-primary-3d" id="btn-start-game" onclick="App.goToTutorial()">
+          НАЧАТЬ ИССЛЕДОВАНИЕ
+        </button>
+      </div>
+
+    </section>
+
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
