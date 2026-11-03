@@ -8,16 +8,16 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="assets/icons/favicon.png">
   <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
-  <link rel="preload" as="image" href="assets/samples/bg_menu.png" media="(max-aspect-ratio: 7/5), (max-width: 639px)" fetchpriority="high">
-  <link rel="preload" as="image" href="assets/samples/bg_menu2.png" media="(min-width: 640px) and (min-aspect-ratio: 7/5)" fetchpriority="high">
-  <link rel="preload" as="image" href="assets/samples/logo_banner.png">
+  <link rel="preload" as="image" href="assets/samples/bg_menu.webp" media="(max-aspect-ratio: 7/5), (max-width: 639px)" fetchpriority="high">
+  <link rel="preload" as="image" href="assets/samples/bg_menu2.webp" media="(min-width: 640px) and (min-aspect-ratio: 7/5)" fetchpriority="high">
+  <link rel="preload" as="image" href="assets/samples/logo_banner.webp">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
   <div class="studio-intro" id="studio-intro">
     <div class="studio-glow"></div>
-    <img src="assets/samples/studio_icon.png" alt="R&amp;G Studio" class="studio-icon" onerror="this.style.display='none'; document.getElementById('studio-fallback').style.display='block';">
+    <img src="assets/samples/studio_icon.webp" alt="R&amp;G Studio" class="studio-icon" onerror="this.style.display='none'; document.getElementById('studio-fallback').style.display='block';">
     <div class="studio-fallback" id="studio-fallback">R&amp;G Studio</div>
     <div class="loader-panel" id="loader-panel">
       <div class="loader-status" id="loader-status">Флори включает свет в лаборатории...</div>
@@ -113,7 +113,7 @@
   <div class="modal-backdrop modal-result" id="modal-feedback" role="dialog" aria-modal="true" aria-labelledby="feedback-title">
     <div class="result-stage" data-side="left">
       <div class="result-flori">
-        <img src="assets/flori/flori_talk.png" alt="Флори" id="feedback-img">
+        <img src="assets/flori/flori_talk.webp" alt="Флори" id="feedback-img">
       </div>
       <div class="result-card" id="feedback-card" data-tone="win">
         <div class="result-head">
@@ -142,7 +142,7 @@
   <div class="modal-backdrop modal-result modal-fact" id="modal-fact" role="dialog" aria-modal="true" aria-labelledby="fact-title" onclick="Lab.closeFact()">
     <div class="result-stage" data-side="right" onclick="event.stopPropagation()">
       <div class="result-flori">
-        <img src="assets/flori/flori_guide.png" alt="Флори">
+        <img src="assets/flori/flori_guide.webp" alt="Флори">
       </div>
       <div class="result-card fact-card" data-tone="fact">
         <div class="fact-ribbon"><span>Интересный факт</span></div>
@@ -171,7 +171,7 @@
   <div class="modal-backdrop modal-result modal-stars" id="modal-stars" role="dialog" aria-modal="true" aria-labelledby="stars-title">
     <div class="result-stage" data-side="left">
       <div class="result-flori">
-        <img src="assets/flori/flori_win.png" alt="Флори">
+        <img src="assets/flori/flori_win.webp" alt="Флори">
       </div>
       <div class="result-card" data-tone="win">
         <div class="result-head">
@@ -210,7 +210,7 @@
       </button>
 
       <div class="logo-zone">
-        <img src="assets/samples/logo_banner.png" alt="Флорика" class="main-logo-img" id="logo-img" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
+        <img src="assets/samples/logo_banner.webp" alt="Флорика" class="main-logo-img" id="logo-img" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
         <div class="logo-fallback" id="logo-fallback">
           <h1>ФЛОРИКА</h1>
           <span>Спасение логики Мэйлии</span>
@@ -218,11 +218,11 @@
       </div>
 
       <div class="flori-stage">
-        <img src="assets/flori/flori_hello.png" alt="Флори приветствует" class="flori-hero-sprite">
+        <img src="assets/flori/flori_hello.webp" alt="Флори приветствует" class="flori-hero-sprite">
       </div>
 
       <div class="hills-vacuum-track">
-        <img src="assets/samples/toy_vacuum.png" alt="Робот-пылесос" class="vacuum-sprite" id="vacuum-img" onerror="this.style.display='none';">
+        <img src="assets/samples/toy_vacuum.webp" alt="Робот-пылесос" class="vacuum-sprite" id="vacuum-img" onerror="this.style.display='none';">
       </div>
 
       <div class="bushes-foreground-layer"></div>
@@ -250,7 +250,7 @@
       </button>
 
       <div class="tutorial-stage" id="tutorial-stage">
-        <img src="assets/flori/flori_panic.png" alt="Флори" class="tutorial-flori-sprite" id="tutorial-flori-img">
+        <img src="assets/flori/flori_panic.webp" alt="Флори" class="tutorial-flori-sprite" id="tutorial-flori-img">
       </div>
 
       <div class="dialogue-box" id="dialogue-box">
@@ -276,7 +276,7 @@
     <section class="screen" id="screen-levels">
 
       <div class="top-bar levels-top">
-        <img src="assets/samples/logo_banner.png" alt="Флорика" class="levels-logo" onerror="this.style.display='none'; document.getElementById('levels-logo-text').style.display='block';">
+        <img src="assets/samples/logo_banner.webp" alt="Флорика" class="levels-logo" onerror="this.style.display='none'; document.getElementById('levels-logo-text').style.display='block';">
         <span class="levels-logo-text" id="levels-logo-text">ФЛОРИКА</span>
 
         <div class="mailia-bar">
@@ -284,7 +284,7 @@
           <span class="mailia-percent">0%</span>
           <span class="demo-tag">ДЕМО</span>
           <div class="mailia-avatar">
-            <img src="assets/samples/mailia_icon.png" alt="" onerror="this.style.display='none'">
+            <img src="assets/samples/mailia_icon.webp" alt="" onerror="this.style.display='none'">
             <span>М</span>
           </div>
         </div>
@@ -297,7 +297,7 @@
 
       <div class="levels-main">
         <div class="levels-flori">
-          <img src="assets/flori/flori_guide.png" alt="Флори" class="levels-flori-img">
+          <img src="assets/flori/flori_guide.webp" alt="Флори" class="levels-flori-img">
         </div>
 
         <div class="levels-center">
@@ -332,7 +332,7 @@
           <span class="mailia-percent">0%</span>
           <span class="demo-tag">ДЕМО</span>
           <div class="mailia-avatar">
-            <img src="assets/samples/mailia_icon.png" alt="" onerror="this.style.display='none'">
+            <img src="assets/samples/mailia_icon.webp" alt="" onerror="this.style.display='none'">
             <span>М</span>
           </div>
         </div>
@@ -428,7 +428,7 @@
     <section class="screen" id="screen-stub">
 
       <div class="tutorial-stage">
-        <img src="assets/flori/flori_guide.png" alt="Флори" class="tutorial-flori-sprite" id="stub-flori-img">
+        <img src="assets/flori/flori_guide.webp" alt="Флори" class="tutorial-flori-sprite" id="stub-flori-img">
       </div>
 
       <div class="dialogue-box">
