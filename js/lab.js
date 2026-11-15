@@ -117,6 +117,7 @@ const Lab = {
     this.closeTablet();
     this.updateSelection();
     this.refreshStars();
+    if (typeof Diary !== "undefined") Diary.refreshDot();
   },
 
   onLayoutChange() {
@@ -133,6 +134,7 @@ const Lab = {
     });
     const count = document.getElementById("lab-count");
     if (count) count.textContent = Progress.labChecked(this.labId) + " / " + GameConfig.hypothesesPerLab;
+    if (typeof Diary !== "undefined") Diary.refreshDot();
   },
 
   onFlaskTap(id) {
@@ -193,7 +195,7 @@ const Lab = {
       App.playSfx("button");
       return;
     }
-    bubble.textContent = this.combo.hint ? this.combo.hint : "Для этой пары подсказки пока нет.";
+    bubble.textContent = this.combo.hint ? App.fill(this.combo.hint) : "Для этой пары подсказки пока нет.";
     bubble.classList.add("is-open");
     if (btn) btn.classList.add("is-active");
     App.playSfx("hint");
@@ -467,11 +469,12 @@ const Lab = {
     const reaction = this.findReaction(option, this.optionIndex) || {};
     let text = reaction.text;
     if (!text) {
-      if (solved) text = "Отлично! Ты верно определил и объяснил.";
+      if (solved) text = "Отлично! Ты верно определил{|а} и объяснил{|а}.";
       else if (verdictOk) text = "Вердикт верный, но объяснение стоит ещё обдумать.";
-      else if (optionOk) text = "Рассуждал ты хорошо, но вердикт подвёл.";
+      else if (optionOk) text = "Рассуждал{|а} ты хорошо, но вердикт подвёл.";
       else text = "Давай ещё раз присмотримся к этой идее позже.";
     }
+    text = App.fill(text);
     const tone = solved ? "win" : (verdictOk || optionOk ? "partial" : "fail");
     const emotion = reaction.emotion || { win: "win", partial: "talk", fail: "think" }[tone];
 
@@ -532,8 +535,8 @@ const Lab = {
   openFact() {
     const fact = this.combo && this.combo.fact;
     if (!fact) return;
-    document.getElementById("fact-title").textContent = fact.title || "";
-    document.getElementById("fact-text").textContent = fact.text || "";
+    document.getElementById("fact-title").textContent = App.fill(fact.title || "");
+    document.getElementById("fact-text").textContent = App.fill(fact.text || "");
     document.getElementById("fact-pair").innerHTML = this.pairMarkup(this.combo);
 
     const img = document.getElementById("fact-img");
@@ -639,42 +642,11 @@ const Lab = {
   },
 
   cheerText(info) {
-    if (info.verified >= info.total) return "Невероятно! Ты проверил всю лабораторию до последней комбинации!";
+    if (info.verified >= info.total) return "Невероятно! Ты проверил{|а} всю лабораторию до последней комбинации!";
     if (info.verified === 0 && info.redo === 0) return "Здесь пока тихо. Создай первую гипотезу, и я всё запишу!";
     let text = "Огоо, уже проверено " + info.verified + " из " + info.total + "!";
     if (info.toNext > 0) text += " До следующей звезды осталось " + info.toNext + ".";
     return text;
-  },
-
-  openStats() {
-    const info = Stats.summary(this.labId);
-    document.getElementById("stats-cheer").textContent = this.cheerText(info);
-
-    const share = value => (info.total ? (value / info.total) * 100 : 0) + "%";
-    document.getElementById("stats-meter").innerHTML =
-      '<span class="seg-ok" style="width:' + share(info.verified) + '"></span>' +
-      '<span class="seg-redo" style="width:' + share(info.redo) + '"></span>' +
-      '<span class="seg-new" style="width:' + share(info.fresh) + '"></span>';
-
-    const legend = (cls, value, label) => '<div class="legend-item ' + cls + '"><span class="legend-value">' + value + '</span><span class="legend-label">' + label + '</span></div>';
-    document.getElementById("stats-legend").innerHTML =
-      legend("ok", info.verified, "проверено полностью") +
-      legend("redo", info.redo, "нужно проверить ещё раз") +
-      legend("new", info.fresh, "ещё не открыто");
-
-    document.getElementById("stats-extra").innerHTML =
-      this.tileMarkup(info.stars + " из " + GameConfig.starThresholds.length, "звёзд получено") +
-      this.tileMarkup(info.attempts, "ответов всего") +
-      this.tileMarkup(info.firstTry, "верно с первой попытки") +
-      this.tileMarkup(info.bestStreak, "лучшая серия подряд") +
-      this.tileMarkup(info.accuracy + "%", "ответов были верными") +
-      this.tileMarkup(info.hints, "подсказок использовано");
-
-    App.openModal("modal-stats");
-  },
-
-  closeStats() {
-    App.closeModal("modal-stats");
   },
 
   onBack() {

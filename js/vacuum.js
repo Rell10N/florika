@@ -8,12 +8,18 @@ const Vacuum = {
 
   settings: {
     holdMs: 5000,
-    fadeMs: 700,
+    fadeMs: 1400,
     cooldownMs: 5000,
-    startSpeed: 150,
-    topSpeed: 640,
-    accel: 780,
-    dropFromTrack: 64
+    startSpeed: 130,
+    topSpeed: 500,
+    rampSeconds: 1.2,
+    digitHeightCompact: 96,
+    digitHeightWide: 150,
+    shiftX: 0,
+    shiftY: 0,
+    wheelGapRatio: 0.05,
+    wheelWidthRatio: 0.046,
+    maxTilt: 7
   },
 
   init() {
@@ -38,8 +44,18 @@ const Vacuum = {
     this.timers.push(setTimeout(callback, delay));
   },
 
-  point(ox, oy, w, h, px, py) {
-    return { x: ox + px * w, y: oy + py * h };
+  unit(x, y) {
+    const length = Math.hypot(x, y) || 1;
+    return { x: x / length, y: y / length };
+  },
+
+  curve(from, fromDir, to, toDir) {
+    const distance = Math.hypot(to.x - from.x, to.y - from.y);
+    const k = Math.max(50, distance * 0.38);
+    const c1 = { x: from.x + fromDir.x * k, y: from.y + fromDir.y * k };
+    const c2 = { x: to.x - toDir.x * k, y: to.y - toDir.y * k };
+    const f = n => n.toFixed(1);
+    return "M" + f(from.x) + " " + f(from.y) + " C" + f(c1.x) + " " + f(c1.y) + " " + f(c2.x) + " " + f(c2.y) + " " + f(to.x) + " " + f(to.y);
   },
 
   sixPath(ox, oy, w, h) {
@@ -54,72 +70,148 @@ const Vacuum = {
 
   sevenPath(ox, oy, w, h) {
     const p = (px, py) => (ox + px * w).toFixed(1) + " " + (oy + py * h).toFixed(1);
-    return "M" + p(0.05, 0.04) + " L" + p(0.95, 0.04) + " L" + p(0.35, 1.0);
+    return "M" + p(0.05, 0.04) + " L" + p(0.8, 0.04) + " Q" + p(0.98, 0.04) + " " + p(0.9, 0.2) + " L" + p(0.35, 1.0);
   },
 
-  line(from, to) {
-    return "M" + from.x.toFixed(1) + " " + from.y.toFixed(1) + " L" + to.x.toFixed(1) + " " + to.y.toFixed(1);
+  place(ox, oy, w, h, px, py) {
+    return { x: ox + px * w, y: oy + py * h };
   },
 
-  makePath(d, draw) {
-    const ns = "http://www.w3.org/2000/svg";
-    const entry = { d, draw, length: 0, nodes: [] };
-    const classes = draw ? ["trail-glow", "trail-core"] : [""];
-    classes.forEach(name => {
-      const node = document.createElementNS(ns, "path");
-      node.setAttribute("d", d);
-      if (name) node.setAttribute("class", name);
-      else node.setAttribute("fill", "none");
-      this.svg.appendChild(node);
-      entry.nodes.push(node);
-    });
-    entry.length = entry.nodes[0].getTotalLength();
-    if (draw) {
-      entry.nodes.forEach(node => {
-        node.style.strokeDasharray = entry.length;
-        node.style.strokeDashoffset = entry.length;
-      });
+  measure() {
+    const settings = this.settings;
+    const wide = document.body.dataset.layout === "wide";
+    const trackRect = this.track.getBoundingClientRect();
+    const flori = document.querySelector(".flori-hero-sprite");
+    const actions = document.querySelector(".menu-action-zone");
+    const floriRect = flori ? flori.getBoundingClientRect() : { left: 0, right: 0, top: 0, bottom: 0 };
+    const actionsRect = actions ? actions.getBoundingClientRect() : { left: 0, right: 0, top: window.innerHeight, bottom: window.innerHeight };
+    let height = wide ? settings.digitHeightWide : settings.digitHeightCompact;
+    let centerX;
+    let topAbs;
+
+    if (wide) {
+      height = Math.min(height, window.innerHeight * 0.17);
+      const total = height * 0.62 * 2.5;
+      const leftFree = floriRect.left - actionsRect.right;
+      const rightFree = window.innerWidth - floriRect.right;
+      if (leftFree >= total + 30) centerX = actionsRect.right + leftFree / 2;
+      else if (rightFree >= total + 30) centerX = floriRect.right + rightFree / 2;
+      else centerX = actionsRect.right + Math.max(0, leftFree) / 2;
+      topAbs = window.innerHeight - height - Math.max(60, window.innerHeight * 0.09);
+    } else {
+      const free = actionsRect.top - floriRect.bottom - 26;
+      height = Math.max(70, Math.min(height, free));
+      centerX = window.innerWidth * 0.44;
+      topAbs = floriRect.bottom + 10;
     }
-    return entry;
+
+    const w = height * 0.62;
+    const gap = w * 0.5;
+    const total = w * 2 + gap;
+    return {
+      h: height,
+      w,
+      gap,
+      left6: centerX - total / 2 - trackRect.left + settings.shiftX,
+      top: topAbs - trackRect.top + settings.shiftY,
+      width: trackRect.width,
+      trackRect
+    };
+  },
+
+  makeGeometry(d) {
+    const ns = "http://www.w3.org/2000/svg";
+    const node = document.createElementNS(ns, "path");
+    node.setAttribute("d", d);
+    node.setAttribute("fill", "none");
+    this.svg.appendChild(node);
+    return node;
+  },
+
+  wheelPaths(center, offset) {
+    const total = center.getTotalLength();
+    const left = [];
+    const right = [];
+    for (let at = 0; at <= total; at += 2.5) {
+      const a = center.getPointAtLength(at);
+      const b = center.getPointAtLength(Math.min(total, at + 0.8));
+      const t = this.unit(b.x - a.x, b.y - a.y);
+      left.push((a.x - t.y * offset).toFixed(1) + " " + (a.y + t.x * offset).toFixed(1));
+      right.push((a.x + t.y * offset).toFixed(1) + " " + (a.y - t.x * offset).toFixed(1));
+    }
+    return ["M" + left.join(" L"), "M" + right.join(" L")];
+  },
+
+  makeDrawn(d, height) {
+    const ns = "http://www.w3.org/2000/svg";
+    const center = this.makeGeometry(d);
+    const length = center.getTotalLength();
+    const offset = Math.max(3.4, height * this.settings.wheelGapRatio);
+    const wheel = Math.max(2.4, height * this.settings.wheelWidthRatio);
+    const nodes = [];
+
+    const band = document.createElementNS(ns, "path");
+    band.setAttribute("d", d);
+    band.setAttribute("class", "trail-band");
+    band.style.strokeWidth = (offset * 2 + wheel) + "px";
+    this.svg.appendChild(band);
+    nodes.push(band);
+
+    this.wheelPaths(center, offset).forEach(wheelD => {
+      const line = document.createElementNS(ns, "path");
+      line.setAttribute("d", wheelD);
+      line.setAttribute("class", "trail-wheel");
+      line.style.strokeWidth = wheel + "px";
+      this.svg.appendChild(line);
+      nodes.push(line);
+    });
+
+    nodes.forEach(node => {
+      node.dataset.length = node.getTotalLength();
+      node.style.strokeDasharray = node.dataset.length;
+      node.style.strokeDashoffset = node.dataset.length;
+    });
+    return { center, length, draw: true, nodes };
+  },
+
+  makeMove(d) {
+    const center = this.makeGeometry(d);
+    return { center, length: center.getTotalLength(), draw: false, nodes: [] };
   },
 
   launch() {
     this.state = "running";
-    const trackRect = this.track.getBoundingClientRect();
+    const layout = this.measure();
     const spriteRect = this.sprite.getBoundingClientRect();
-    const wide = document.body.dataset.layout === "wide";
-    const width = trackRect.width;
-
-    const digitH = Math.round(Math.min(wide ? 230 : 170, Math.max(wide ? 150 : 110, window.innerHeight * (wide ? 0.2 : 0.17))));
-    const digitW = digitH * 0.62;
-    const gap = digitW * 0.5;
-    const center = wide ? width * 0.62 : width * 0.5;
-    const left6 = center - (digitW * 2 + gap) / 2;
-    const left7 = left6 + digitW + gap;
-    const top = this.settings.dropFromTrack + (wide ? 14 : 0);
-
+    const trackRect = layout.trackRect;
     const offsetX = spriteRect.width / 2;
     const offsetY = spriteRect.height * 0.9;
-    this.offset = { x: offsetX, y: offsetY, w: spriteRect.width, h: spriteRect.height };
+    this.offset = { x: offsetX, y: offsetY };
 
+    const startDir = this.currentDirection();
     const start = { x: spriteRect.left - trackRect.left + offsetX, y: spriteRect.top - trackRect.top + offsetY };
-    const s6 = this.point(left6, top, digitW, digitH, 0.82, 0.04);
-    const e6 = this.point(left6, top, digitW, digitH, 0.05, 0.68);
-    const s7 = this.point(left7, top, digitW, digitH, 0.05, 0.04);
-    const e7 = this.point(left7, top, digitW, digitH, 0.35, 1.0);
-    const exit = { x: width + spriteRect.width + 60, y: e7.y - 18 };
+    const left7 = layout.left6 + layout.w + layout.gap;
+    const s6 = this.place(layout.left6, layout.top, layout.w, layout.h, 0.82, 0.04);
+    const e6 = this.place(layout.left6, layout.top, layout.w, layout.h, 0.05, 0.68);
+    const s7 = this.place(left7, layout.top, layout.w, layout.h, 0.05, 0.04);
+    const e7 = this.place(left7, layout.top, layout.w, layout.h, 0.35, 1.0);
+    const exit = { x: layout.width + spriteRect.width + 80, y: e7.y - layout.h * 0.2 };
 
     const ns = "http://www.w3.org/2000/svg";
     this.svg = document.createElementNS(ns, "svg");
     this.svg.setAttribute("class", "vacuum-trail");
     this.track.insertBefore(this.svg, this.track.firstChild);
 
+    const dir6 = this.unit(-0.37 * layout.w, -0.06 * layout.h);
+    const dir7 = this.unit(1, 0);
+    const out7 = this.unit(-0.55 * layout.w, 0.8 * layout.h);
+
     this.segments = [
-      this.makePath(this.line(start, s6), false),
-      this.makePath(this.sixPath(left6, top, digitW, digitH), true),
-      this.makePath(this.line(e6, s7), false),
-      this.makePath(this.sevenPath(left7, top, digitW, digitH), true),
-      this.makePath(this.line(e7, exit), false)
+      this.makeMove(this.curve(start, { x: startDir, y: 0 }, s6, dir6)),
+      this.makeDrawn(this.sixPath(layout.left6, layout.top, layout.w, layout.h), layout.h),
+      this.makeMove(this.curve(e6, { x: 0, y: 1 }, s7, dir7)),
+      this.makeDrawn(this.sevenPath(left7, layout.top, layout.w, layout.h), layout.h),
+      this.makeMove(this.curve(e7, out7, exit, { x: 1, y: 0 }))
     ];
     this.total = this.segments.reduce((sum, seg) => sum + seg.length, 0);
 
@@ -128,8 +220,9 @@ const Vacuum = {
     this.track.style.overflow = "visible";
 
     this.dist = 0;
-    this.speed = this.settings.startSpeed;
-    this.dir = this.currentDirection();
+    this.elapsed = 0;
+    this.dir = startDir;
+    this.tilt = 0;
     this.last = performance.now();
     this.prev = start;
     this.frame = requestAnimationFrame((now) => this.step(now));
@@ -144,10 +237,13 @@ const Vacuum = {
   },
 
   step(now) {
+    const settings = this.settings;
     const dt = Math.min(0.05, (now - this.last) / 1000);
     this.last = now;
-    this.speed = Math.min(this.settings.topSpeed, this.speed + this.settings.accel * dt);
-    this.dist = Math.min(this.total, this.dist + this.speed * dt);
+    this.elapsed += dt;
+    const ramp = 1 - Math.exp(-3 * this.elapsed / settings.rampSeconds);
+    const speed = settings.startSpeed + (settings.topSpeed - settings.startSpeed) * ramp;
+    this.dist = Math.min(this.total, this.dist + speed * dt);
 
     let passed = 0;
     let index = 0;
@@ -155,24 +251,30 @@ const Vacuum = {
       passed += this.segments[index].length;
       index++;
     }
-    const local = this.dist - passed;
     const current = this.segments[index];
-    const point = current.nodes[0].getPointAtLength(Math.min(local, current.length));
+    const local = Math.min(this.dist - passed, current.length);
+    const point = current.center.getPointAtLength(local);
 
     this.segments.forEach((seg, i) => {
       if (!seg.draw) return;
       const covered = i < index ? seg.length : (i === index ? local : 0);
+      const share = seg.length ? covered / seg.length : 1;
       seg.nodes.forEach(node => {
-        node.style.strokeDashoffset = Math.max(0, seg.length - covered);
+        const length = Number(node.dataset.length);
+        node.style.strokeDashoffset = Math.max(0, length * (1 - share));
       });
     });
 
     const dx = point.x - this.prev.x;
-    if (Math.abs(dx) > 0.15) this.dir = dx > 0 ? 1 : -1;
+    const dy = point.y - this.prev.y;
+    if (Math.abs(dx) > 0.2) this.dir = dx > 0 ? 1 : -1;
+    const target = Math.max(-settings.maxTilt, Math.min(settings.maxTilt, Math.atan2(dy, Math.abs(dx) + 0.001) * 57.3 * 0.25));
+    this.tilt += (target - this.tilt) * 0.12;
     this.prev = point;
+
     const px = point.x - this.offset.x;
     const py = point.y - this.offset.y;
-    this.sprite.style.transform = "translate3d(" + px.toFixed(1) + "px," + py.toFixed(1) + "px,0) scaleX(" + this.dir + ")";
+    this.sprite.style.transform = "translate3d(" + px.toFixed(1) + "px," + py.toFixed(1) + "px,0) scaleX(" + this.dir + ") rotate(" + this.tilt.toFixed(1) + "deg)";
 
     if (this.dist >= this.total) {
       this.finish();

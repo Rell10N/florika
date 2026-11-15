@@ -1035,7 +1035,9 @@ body {
   color: #2f4a1f;
 }
 .level-card.is-locked .level-num {
-  color: #7d8878;
+  z-index: 3;
+  color: #4a5444;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 .level-deco {
   flex: none;
@@ -3008,29 +3010,393 @@ body[data-split="on"] .btn-to-shelf {
   height: 100%;
   overflow: visible;
   pointer-events: none;
-  filter: drop-shadow(0 2px 0 rgba(40, 90, 20, 0.35));
-  transition: opacity 0.7s ease;
+  transition: opacity 1.4s ease;
 }
 .vacuum-trail.is-fading {
   opacity: 0;
 }
-.trail-glow,
-.trail-core {
+.trail-band,
+.trail-wheel {
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.trail-glow {
-  stroke: rgba(255, 255, 255, 0.3);
-  stroke-width: 20;
+.trail-band {
+  stroke: rgba(255, 252, 220, 0.13);
 }
-.trail-core {
-  stroke: rgba(238, 255, 214, 0.92);
-  stroke-width: 9;
+.trail-wheel {
+  stroke: rgba(26, 64, 18, 0.62);
 }
-body[data-layout="wide"] .trail-glow {
-  stroke-width: 28;
+
+.gender-pick {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
 }
-body[data-layout="wide"] .trail-core {
-  stroke-width: 12;
+.gender-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 9px 6px;
+  background: #eef4e6;
+  color: #3d5a2a;
+  border: 3px solid #cfe0c2;
+  border-radius: 14px;
+  font-size: clamp(0.82rem, 3.4vw, 1rem);
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+.gender-btn.is-active {
+  background: #d9f8c7;
+  color: #1d5a0c;
+  border-color: var(--bio-green);
+  box-shadow: 0 0 0 3px rgba(69, 236, 9, 0.25);
+}
+.name-error {
+  min-height: 1.2em;
+  margin-top: 8px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #b33a2f;
+}
+.name-input-wrap input.is-shaking {
+  border-color: #ff6f61;
+  animation: shake 0.35s ease;
+}
+
+@media (max-width: 480px) {
+  body[data-layout="compact"] .lab-top {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  body[data-layout="compact"] .lab-top .btn-back {
+    flex: none;
+    padding: 8px 12px;
+    font-size: 0.95rem;
+  }
+  body[data-layout="compact"] .lab-top .lab-right {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+  body[data-layout="compact"] .lab-top .btn-round {
+    width: 38px;
+    height: 38px;
+  }
+  body[data-layout="compact"] .lab-top .btn-round svg {
+    width: 20px;
+    height: 20px;
+  }
+  body[data-layout="compact"] .lab-top .lab-stars {
+    gap: 3px;
+    padding: 5px 8px;
+  }
+  body[data-layout="compact"] .lab-top .lab-star {
+    width: 20px;
+    height: 20px;
+  }
+  body[data-layout="compact"] .lab-top .lab-count {
+    font-size: 0.8rem;
+  }
+}
+
+.btn-diary {
+  position: relative;
+  width: auto;
+  min-width: 46px;
+  gap: 8px;
+  padding: 0 14px 0 11px;
+  color: #6b3f1d;
+  border-color: #e3c9a2;
+  background: linear-gradient(180deg, #fff8e8, #f9e7c4);
+  box-shadow: 0 4px 0 #cba86e;
+}
+.btn-diary:active {
+  box-shadow: 0 1px 0 #cba86e;
+}
+.diary-label {
+  display: none;
+  font-size: 1rem;
+  font-weight: 900;
+}
+body[data-layout="wide"] .diary-label {
+  display: inline;
+}
+body[data-layout="compact"] .btn-diary {
+  width: 38px;
+  padding: 0;
+}
+.diary-dot {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 16px;
+  height: 16px;
+  background: #ff6f61;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  animation: readyPulse 1.2s ease-in-out infinite;
+}
+.diary-card {
+  width: min(94%, 680px);
+  max-height: calc(100dvh - 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 16px 14px;
+  background: linear-gradient(180deg, #fffaf0, #fbf1da);
+  border: 5px solid #e3c9a2;
+}
+.diary-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.diary-book {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  color: #b9742a;
+}
+.diary-title {
+  flex: 1;
+  font-size: clamp(1.3rem, 1.1rem + 1vw, 1.8rem);
+  font-weight: 900;
+  color: #6b3f1d;
+}
+.diary-x {
+  width: 40px;
+  height: 40px;
+}
+.diary-tabs {
+  flex: none;
+  display: flex;
+  gap: 8px;
+  padding: 4px;
+  background: #f1e0bb;
+  border-radius: 16px;
+}
+.diary-tab {
+  flex: 1;
+  padding: 9px 8px;
+  background: transparent;
+  color: #7a5630;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+.diary-tab.is-active {
+  background: #ffffff;
+  color: #2f4a1f;
+  box-shadow: 0 2px 0 rgba(120, 80, 30, 0.25);
+}
+.diary-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2px 2px 6px;
+  scrollbar-width: thin;
+}
+.diary-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.diary-progress strong {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #3d5a2a;
+}
+.diary-bar {
+  height: 16px;
+  overflow: hidden;
+  background: #e9dcc0;
+  border: 3px solid #d9c59c;
+  border-radius: 999px;
+}
+.diary-bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(180deg, #86ff55, #45c92a);
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+.diary-note {
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #7a6a4a;
+}
+.diary-grid {
+  padding: 10px 2px 2px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 10px;
+}
+.diary-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-height: 132px;
+  padding: 10px 8px 10px;
+  border: 3px solid;
+  border-radius: 18px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+.diary-item:active {
+  transform: translateY(2px);
+}
+.diary-item.is-done {
+  background: #effcea;
+  border-color: #3ccf4e;
+  box-shadow: 0 4px 0 #2a9c3a;
+}
+.diary-item.is-redo {
+  background: #fff4d9;
+  border-color: #f5a524;
+  box-shadow: 0 4px 0 #c98410;
+}
+.diary-item.is-locked {
+  justify-content: center;
+  background: #eef0e9;
+  border-color: #c3cbb9;
+  border-style: dashed;
+}
+.diary-q {
+  font-size: 2.4rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #b4bdaa;
+}
+.diary-name {
+  font-size: 0.9rem;
+  font-weight: 900;
+  line-height: 1.15;
+  text-align: center;
+  color: #3d5a2a;
+}
+.diary-item.is-locked .diary-name {
+  color: #8d977f;
+}
+.diary-item.is-redo .diary-name {
+  color: #8a5600;
+}
+.diary-pair {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+.diary-pair .pair-item {
+  width: 38%;
+  height: auto;
+  padding: 6%;
+  border-width: 2px;
+  box-shadow: 0 2px 0 rgba(30, 60, 120, 0.2);
+}
+.diary-pair .pair-plus {
+  font-size: 0.95rem;
+}
+.diary-pair.big {
+  width: 150px;
+  flex: none;
+}
+.diary-tag {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+.diary-tag.yes {
+  background: #d4f5d0;
+  color: #1d7a2a;
+}
+.diary-tag.no {
+  background: #ffe0dc;
+  color: #a8362b;
+}
+.diary-new {
+  position: absolute;
+  top: -9px;
+  right: 8px;
+  padding: 2px 9px;
+  background: #ff6f61;
+  color: #ffffff;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 900;
+  box-shadow: 0 2px 0 #c0443a;
+}
+.diary-back {
+  align-self: flex-start;
+  margin-left: 0;
+}
+.diary-detail-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.diary-detail-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.diary-detail-title h3 {
+  font-size: clamp(1.2rem, 1.05rem + 0.8vw, 1.6rem);
+  font-weight: 900;
+  line-height: 1.15;
+  color: #2f4a1f;
+}
+.diary-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: #ffffff;
+  border: 3px solid #e3d2ad;
+  border-radius: 16px;
+}
+.diary-block h4 {
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: #7a5630;
+}
+.diary-block p {
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--text-dark);
+}
+.diary-block.why {
+  background: #effcea;
+  border-color: #b9e8a8;
+}
+.diary-block.fact {
+  background: #eef4ff;
+  border-color: #bdd0f6;
+}
+.diary-block .diary-fact-title {
+  font-weight: 900;
+  color: #0b3cc1;
+}
+body[data-layout="wide"] .diary-card {
+  width: min(94%, 860px);
+}
+body[data-layout="wide"] .diary-grid {
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
 }

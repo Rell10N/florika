@@ -150,6 +150,8 @@ const Levels = {
 
 const App = {
   playerName: "",
+  gender: "m",
+  genderChoice: null,
   currentTutorialStep: 0,
   maxVisitedStep: -1,
   inputStepIndex: -1,
@@ -158,7 +160,7 @@ const App = {
   typewriterTimeout: null,
   currentFullText: "",
 
-  save: { prologueDone: false, playerName: "", checked: {}, tried: {}, stats: {}, endings: {}, demo: { active: false, percent: 0 } },
+  save: { prologueDone: false, playerName: "", gender: "m", checked: {}, tried: {}, stats: {}, endings: {}, diarySeen: {}, demo: { active: false, percent: 0 } },
   saveKey: "florika_save_v2",
   soundOn: true,
   speechActive: null,
@@ -222,7 +224,7 @@ const App = {
         this.closeModal("modal-settings");
         this.closeModal("modal-exit");
         this.closeModal("modal-fact");
-        this.closeModal("modal-stats");
+        this.closeModal("modal-diary");
         this.closeModal("modal-submit");
       }
     });
@@ -241,7 +243,7 @@ const App = {
   },
 
   defaultSave() {
-    return { prologueDone: false, playerName: "", checked: {}, tried: {}, stats: {}, endings: {}, demo: { active: false, percent: 0 } };
+    return { prologueDone: false, playerName: "", gender: "m", checked: {}, tried: {}, stats: {}, endings: {}, diarySeen: {}, demo: { active: false, percent: 0 } };
   },
 
   loadSave() {
@@ -252,8 +254,10 @@ const App = {
         const data = JSON.parse(raw);
         this.save.prologueDone = data.prologueDone === true;
         this.save.playerName = typeof data.playerName === "string" ? data.playerName : "";
+        this.save.gender = data.gender === "f" ? "f" : "m";
         this.save.checked = data.checked && typeof data.checked === "object" ? data.checked : {};
         this.save.endings = data.endings && typeof data.endings === "object" ? data.endings : {};
+        this.save.diarySeen = data.diarySeen && typeof data.diarySeen === "object" ? data.diarySeen : {};
         this.save.tried = data.tried && typeof data.tried === "object" ? data.tried : {};
         this.save.stats = data.stats && typeof data.stats === "object" ? data.stats : {};
         if (data.demo && typeof data.demo === "object") {
@@ -270,6 +274,7 @@ const App = {
       }
     } catch (e) {}
     this.playerName = this.save.playerName;
+    this.gender = this.save.gender;
     this.updateSoundToggle();
     this.syncVolumeUI();
   },
@@ -279,13 +284,15 @@ const App = {
       localStorage.setItem(this.saveKey, JSON.stringify({
         prologueDone: this.save.prologueDone,
         playerName: this.save.playerName,
+        gender: this.save.gender,
         checked: this.save.checked,
         tried: this.save.tried,
         stats: this.save.stats,
         demo: this.save.demo,
         soundOn: this.soundOn,
         volumes: this.volumes,
-        endings: this.save.endings
+        endings: this.save.endings,
+        diarySeen: this.save.diarySeen
       }));
     } catch (e) {}
   },
@@ -410,7 +417,7 @@ const App = {
     const focused = document.activeElement;
     const insideModal = focused && focused.closest && focused.closest(".modal-backdrop.open");
     if (insideModal) return null;
-    if (["modal-settings", "modal-exit", "modal-submit", "modal-stats"].some(isOpen)) return null;
+    if (["modal-settings", "modal-exit", "modal-submit", "modal-diary"].some(isOpen)) return null;
     if (isOpen("modal-fact")) return () => Lab.closeFact();
     if (isOpen("modal-stars")) return () => Lab.closeStars();
     if (isOpen("modal-feedback")) return () => Lab.nextAfterFeedback();
@@ -469,6 +476,14 @@ const App = {
       if (e.key === "Enter") {
         e.preventDefault();
         this.advance();
+      }
+    });
+    input.addEventListener("input", () => {
+      this.showNameError("");
+      const guess = Name.validate(input.value) ? "" : Name.guess(Name.format(input.value));
+      if (guess) {
+        this.genderChoice = guess;
+        this.paintGender();
       }
     });
   },
@@ -850,6 +865,10 @@ const App = {
     if (modal) modal.classList.remove("open");
     if (this.speechActive && modal && modal.contains(this.speechActive)) this.stopSpeech();
     if (id === "modal-settings") this.disarmReset();
+    if (id === "modal-diary" && typeof Diary !== "undefined") {
+      Diary.markSeen();
+      Diary.refreshDot();
+    }
   },
 
   showToast(message) {
@@ -1032,9 +1051,7 @@ const App = {
   },
 
   fillText(text) {
-    const who = this.playerName || "Исследователь";
-    const percent = Math.round(Progress.effectivePercent());
-    return String(text).replace(/\{who\}/g, who).replace(/\{percent\}/g, percent);
+    return this.fill(text);
   },
 
   playEnding(key) {
@@ -1168,6 +1185,10 @@ const App = {
     this.currentTutorialStep = 0;
     this.maxVisitedStep = -1;
     this.playerName = this.save.playerName;
+    this.gender = this.save.gender;
+    this.genderChoice = this.save.playerName ? this.save.gender : null;
+    this.paintGender();
+    this.showNameError("");
     const input = document.getElementById("player-name-input");
     if (input) input.value = this.save.playerName;
 
@@ -1179,12 +1200,50 @@ const App = {
     });
   },
 
+  title() {
+    return this.gender === "f" ? "Исследовательница" : "Исследователь";
+  },
+
   getAddress() {
-    return this.playerName ? "Исследователь " + this.playerName : "Исследователь";
+    return this.playerName ? this.title() + " " + this.playerName : this.title();
+  },
+
+  fill(text) {
+    const percent = Math.round(Progress.effectivePercent());
+    return String(text)
+      .replace(/\{([^{}|]*)\|([^{}|]*)\}/g, (match, male, female) => (this.gender === "f" ? female : male))
+      .replace(/\{who\}/g, this.getAddress())
+      .replace(/\{title\}/g, this.title())
+      .replace(/\{percent\}/g, percent);
   },
 
   formatText(text) {
-    return text.replace(/\{who\}/g, this.getAddress());
+    return this.fill(text);
+  },
+
+  pickGender(value) {
+    this.genderChoice = value;
+    this.paintGender();
+    this.showNameError("");
+  },
+
+  paintGender() {
+    document.querySelectorAll("#gender-pick .gender-btn").forEach(btn => {
+      const active = btn.dataset.gender === this.genderChoice;
+      btn.classList.toggle("is-active", active);
+      btn.setAttribute("aria-checked", active ? "true" : "false");
+    });
+  },
+
+  showNameError(message) {
+    const el = document.getElementById("name-error");
+    const input = document.getElementById("player-name-input");
+    if (el) el.textContent = message;
+    if (message && input) {
+      input.classList.remove("is-shaking");
+      void input.offsetWidth;
+      input.classList.add("is-shaking");
+    }
   },
 
   resolveStep(rawStep) {
@@ -1294,14 +1353,33 @@ const App = {
     }
   },
 
-  commitName() {
+  confirmName(strict) {
     const input = document.getElementById("player-name-input");
-    if (!input) return;
-    const cleaned = input.value.replace(/\s+/g, " ").trim();
-    if (cleaned !== this.playerName) {
-      this.playerName = cleaned;
+    if (!input) return true;
+    const problem = Name.validate(input.value);
+    if (problem && strict) {
+      this.showNameError(GameData.nameMessages[problem]);
+      return false;
+    }
+    const name = problem ? "" : Name.format(input.value);
+    let gender = this.genderChoice || Name.guess(name);
+    if (!gender) {
+      if (name && strict) {
+        this.showNameError(GameData.nameMessages.pick);
+        return false;
+      }
+      gender = "m";
+    }
+    if (name !== this.playerName || gender !== this.gender) {
       this.maxVisitedStep = Math.min(this.maxVisitedStep, this.inputStepIndex);
     }
+    this.playerName = name;
+    this.gender = gender;
+    this.genderChoice = gender;
+    input.value = name;
+    this.paintGender();
+    this.showNameError("");
+    return true;
   },
 
   onScreenTap() {
@@ -1326,7 +1404,7 @@ const App = {
       return;
     }
     if (this.currentTutorialStep === this.inputStepIndex) {
-      this.commitName();
+      this.confirmName(false);
       const input = document.getElementById("player-name-input");
       if (input) input.blur();
     }
@@ -1341,7 +1419,7 @@ const App = {
     }
     const lastIndex = GameData.prologue.length - 1;
     if (this.currentTutorialStep === this.inputStepIndex) {
-      this.commitName();
+      if (!this.confirmName(true)) return;
       const input = document.getElementById("player-name-input");
       if (input) input.blur();
     }
@@ -1378,6 +1456,7 @@ const App = {
     this.isBusy = true;
     this.save.prologueDone = true;
     this.save.playerName = this.playerName;
+    this.save.gender = this.gender;
     this.persist();
 
     const stageEl = document.getElementById("tutorial-stage");

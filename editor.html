@@ -237,6 +237,16 @@ textarea:focus, input:focus, select:focus {
   font-weight: 700;
   line-height: 1.4;
 }
+.importer-card {
+  max-width: 1244px;
+  margin: 18px auto 0;
+}
+#importer {
+  padding: 0 18px;
+}
+#importer[hidden] {
+  display: none;
+}
 @media (max-width: 900px) {
   main {
     grid-template-columns: 1fr;
@@ -258,8 +268,21 @@ textarea:focus, input:focus, select:focus {
   <h1>Редактор комбинаций Флорики</h1>
   <label class="file-btn">Открыть combo.json<input type="file" id="file" accept=".json,application/json"></label>
   <button id="add">Новая комбинация</button>
+  <button id="paste">Вставить из ИИ</button>
   <button id="save" class="primary">Скачать combo.json</button>
 </header>
+<div id="importer" hidden>
+  <div class="card importer-card">
+    <h2>Вставьте ответ ИИ</h2>
+    <div class="tip">Можно вставить целый ответ вместе с кодовым блоком. Если такой комбинации ещё нет, она добавится. Если есть, обновятся только те поля, которые прислал ИИ.</div>
+    <textarea id="importer-text" rows="10" placeholder="Сюда вставьте JSON, который дал ИИ"></textarea>
+    <div class="row">
+      <button class="primary" id="importer-apply">Применить</button>
+      <button id="importer-close">Закрыть</button>
+    </div>
+    <div class="meta" id="importer-result"></div>
+  </div>
+</div>
 <main>
   <div id="list"></div>
   <div id="form"></div>
@@ -360,7 +383,7 @@ function wordsInfo(text) {
 
 function metaFor(text, limit) {
   const box = el("div", { class: "meta" });
-  const len = text.length;
+  const len = text.replace(/\{([^{}|]*)\|[^{}|]*\}/g, "$1").length;
   const cls = len <= limit ? "ok" : (len <= limit * 1.3 ? "warn" : "bad");
   box.appendChild(el("span", { class: cls, text: len + " из " + limit + " знаков" }));
   const info = wordsInfo(text);
@@ -621,6 +644,77 @@ document.getElementById("file").addEventListener("change", (e) => {
     }
   };
   reader.readAsText(file, "utf-8");
+});
+
+function extractJson(text) {
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const body = (fenced ? fenced[1] : text).trim();
+  return JSON.parse(body);
+}
+
+function mergeCombo(target, patch) {
+  Object.keys(patch).forEach(key => {
+    if (key === "reactions") {
+      Object.keys(patch.reactions).forEach(k => { target.reactions[k] = patch.reactions[k]; });
+    } else if (key === "fact") {
+      Object.keys(patch.fact).forEach(k => { target.fact[k] = patch.fact[k]; });
+    } else if (key === "options") {
+      target.options = patch.options.map((o, i) => Object.assign({ id: LETTERS[i] }, o));
+      target.options.forEach(o => {
+        if (typeof o.correct !== "boolean") o.correct = o.type === "correct";
+        if (!o.type) o.type = o.correct ? "correct" : "wrong_possible";
+      });
+    } else {
+      target[key] = patch[key];
+    }
+  });
+}
+
+function importFromAi(text) {
+  const data = extractJson(text);
+  const items = Array.isArray(data) ? data : [data];
+  let added = 0;
+  let updated = 0;
+  items.forEach(item => {
+    if (!item || !item.id) throw new Error("У комбинации нет id");
+    const key = sortedId(item.id);
+    const found = combos.find(c => sortedId(c.id) === key);
+    if (found) {
+      mergeCombo(found, item);
+      found.id = key;
+      normalize(found);
+      updated++;
+    } else {
+      const fresh = blankCombo();
+      mergeCombo(fresh, item);
+      fresh.id = key;
+      combos.push(normalize(fresh));
+      added++;
+    }
+  });
+  persist();
+  render();
+  return "Добавлено: " + added + ", обновлено: " + updated;
+}
+
+document.getElementById("paste").addEventListener("click", () => {
+  const box = document.getElementById("importer");
+  box.hidden = !box.hidden;
+  document.getElementById("importer-result").textContent = "";
+});
+
+document.getElementById("importer-close").addEventListener("click", () => {
+  document.getElementById("importer").hidden = true;
+});
+
+document.getElementById("importer-apply").addEventListener("click", () => {
+  const result = document.getElementById("importer-result");
+  try {
+    result.textContent = importFromAi(document.getElementById("importer-text").value);
+    document.getElementById("importer-text").value = "";
+  } catch (err) {
+    result.textContent = "Не получилось прочитать ответ ИИ: " + err.message;
+  }
 });
 
 document.getElementById("add").addEventListener("click", () => {

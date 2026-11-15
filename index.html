@@ -190,14 +190,20 @@
     </div>
   </div>
 
-  <div class="modal-backdrop" id="modal-stats" role="dialog" aria-modal="true" aria-labelledby="stats-heading" onclick="Lab.closeStats()">
-    <div class="modal-card modal-scroll stats-card" onclick="event.stopPropagation()">
-      <h2 class="modal-title" id="stats-heading">Сводка лаборатории</h2>
-      <p class="stats-cheer" id="stats-cheer"></p>
-      <div class="stats-meter" id="stats-meter"></div>
-      <div class="stats-legend" id="stats-legend"></div>
-      <div class="stats-extra" id="stats-extra"></div>
-      <button class="btn-primary-3d" onclick="Lab.closeStats()">ЗАКРЫТЬ</button>
+  <div class="modal-backdrop" id="modal-diary" role="dialog" aria-modal="true" aria-labelledby="diary-heading" onclick="Diary.close()">
+    <div class="modal-card diary-card" onclick="event.stopPropagation()">
+      <div class="diary-head">
+        <svg class="diary-book" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18 2H8a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h12V4a2 2 0 0 0-2-2zm-1 13H8a1 1 0 0 0-1 1V5a1 1 0 0 1 1-1h9v11zM8 18h11v2H8a1 1 0 0 1 0-2z"/></svg>
+        <h2 class="diary-title" id="diary-heading">Дневник открытий</h2>
+        <button class="btn-round diary-x" type="button" aria-label="Закрыть" data-sfx="none" onclick="Diary.close()">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3z"/></svg>
+        </button>
+      </div>
+      <div class="diary-tabs" role="tablist">
+        <button class="diary-tab is-active" type="button" role="tab" data-tab="book" data-sfx="none" onclick="Diary.tab('book')">Открытия</button>
+        <button class="diary-tab" type="button" role="tab" data-tab="stats" data-sfx="none" onclick="Diary.tab('stats')">Сводка</button>
+      </div>
+      <div class="diary-body" id="diary-body"></div>
     </div>
   </div>
 
@@ -263,6 +269,11 @@
 
         <div class="name-input-wrap">
           <input type="text" id="player-name-input" placeholder="Введи своё имя..." maxlength="15" autocomplete="off" enterkeyhint="done">
+          <div class="gender-pick" id="gender-pick" role="radiogroup" aria-label="Как к тебе обращаться">
+            <button type="button" class="gender-btn" data-gender="m" role="radio" aria-checked="false" onclick="event.stopPropagation(); App.pickGender('m')">Исследователь</button>
+            <button type="button" class="gender-btn" data-gender="f" role="radio" aria-checked="false" onclick="event.stopPropagation(); App.pickGender('f')">Исследовательница</button>
+          </div>
+          <p class="name-error" id="name-error" aria-live="polite"></p>
         </div>
 
         <div class="dialogue-buttons">
@@ -338,8 +349,10 @@
         </div>
 
         <div class="lab-right">
-          <button class="btn-round btn-stats" id="btn-stats" aria-label="Сводка лаборатории" data-sfx="none" onclick="Lab.openStats()">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 20V10h4v10H4zm6 0V4h4v16h-4zm6 0v-7h4v7h-4z"/></svg>
+          <button class="btn-round btn-diary" id="btn-diary" type="button" aria-label="Дневник открытий" data-sfx="none" onclick="Diary.open('book')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18 2H8a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h12V4a2 2 0 0 0-2-2zm-1 13H8a1 1 0 0 0-1 1V5a1 1 0 0 1 1-1h9v11zM8 18h11v2H8a1 1 0 0 1 0-2z"/></svg>
+            <span class="diary-label">Дневник</span>
+            <span class="diary-dot is-hidden" id="diary-dot"></span>
           </button>
           <div class="lab-stars">
             <svg class="star-icon lab-star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -461,9 +474,11 @@
   </div>
 
   <script src="js/data.js" defer></script>
+  <script src="js/name.js" defer></script>
   <script src="js/loader.js" defer></script>
   <script src="js/app.js" defer></script>
   <script src="js/lab.js" defer></script>
+  <script src="js/diary.js" defer></script>
   <script src="js/vacuum.js" defer></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-const CACHE_VERSION = "florika-v1";
+const CACHE_VERSION = "florika-v4";
 
 self.addEventListener("install", () => {
   self.skipWaiting();
@@ -22,11 +22,13 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       caches.open(CACHE_VERSION).then(cache =>
         cache.match(request).then(cached => {
-          if (cached) return cached;
-          return fetch(request).then(response => {
-            if (response.ok) cache.put(request, response.clone());
-            return response;
-          });
+          const update = fetch(new Request(request, { cache: "no-cache" }))
+            .then(response => {
+              if (response.ok) cache.put(request, response.clone());
+              return response;
+            })
+            .catch(() => cached);
+          return cached || update;
         })
       )
     );
