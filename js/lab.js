@@ -99,7 +99,10 @@ const Lab = {
         btn.innerHTML = '<span class="flask-shadow"></span>' +
           '<span class="flask-lift">' + this.flaskSvg(item) + '</span>' +
           '<span class="flask-name">' + item.name + '</span>';
-        btn.addEventListener("click", () => this.onFlaskTap(item.id));
+        btn.addEventListener("click", () => {
+          this.onFlaskTap(item.id);
+          btn.blur();
+        });
         row.appendChild(btn);
       });
       grid.appendChild(row);
@@ -133,7 +136,7 @@ const Lab = {
   },
 
   onFlaskTap(id) {
-    if (this.busy || this.combo) return;
+    if (this.busy) return;
     const index = this.selected.indexOf(id);
     if (index >= 0) {
       this.selected.splice(index, 1);
@@ -196,7 +199,7 @@ const Lab = {
     App.playSfx("hint");
     if (!this.hintUsed) {
       this.hintUsed = true;
-      App.recordHint(this.labId);
+      if (!this.isKnown(this.combo)) App.recordHint(this.labId);
     }
     setTimeout(() => {
       bubble.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -211,7 +214,7 @@ const Lab = {
   },
 
   createHypothesis() {
-    if (this.busy || this.combo) return;
+    if (this.busy) return;
     if (this.selected.length < 2) {
       App.playSfx("locked");
       App.showToast("Выбери две колбы");
@@ -227,6 +230,7 @@ const Lab = {
     }
     this.busy = true;
     this.hideHint();
+    if (this.combo) this.closeTablet();
     App.playSfx("create", { jitter: false });
     this.playFusion(idA, idB, () => {
       this.busy = false;
@@ -257,6 +261,21 @@ const Lab = {
       fusion.classList.remove("run");
       done();
     }, 1900);
+  },
+
+  backToShelf() {
+    if (this.busy) return;
+    this.closeTablet();
+    this.updateSelection();
+  },
+
+  canCheck() {
+    return !!this.combo && this.verdictChoice !== null && this.optionIndex >= 0 && !this.pending;
+  },
+
+  isKnown(combo) {
+    const checked = App.save.checked[this.labId];
+    return !!(checked && combo && checked[combo.id]);
   },
 
   setView(view) {
@@ -364,7 +383,10 @@ const Lab = {
 
       btn.appendChild(badge);
       btn.appendChild(label);
-      btn.addEventListener("click", () => this.chooseOption(i));
+      btn.addEventListener("click", () => {
+        this.chooseOption(i);
+        btn.blur();
+      });
       grid.appendChild(btn);
     });
   },

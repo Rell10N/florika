@@ -67,6 +67,8 @@ const Stats = {
       verified,
       redo,
       fresh,
+      firstTry: Math.min(own.firstTry, verified),
+      bestStreak: Math.min(own.bestStreak, verified),
       stars: Progress.labStars(labId),
       toNext: next === undefined ? 0 : next - verified,
       accuracy: own.attempts ? Math.round((own.solved / own.attempts) * 100) : 0
@@ -195,6 +197,7 @@ const App = {
     this.registerWorker();
     this.loadCombos();
     Loader.run();
+    Vacuum.init();
     Levels.render();
     this.refreshProgressUI();
     if (typeof Lab !== "undefined") Lab.init();
@@ -214,6 +217,7 @@ const App = {
     });
 
     document.addEventListener("keydown", (e) => {
+      this.handleEnter(e);
       if (e.key === "Escape") {
         this.closeModal("modal-settings");
         this.closeModal("modal-exit");
@@ -320,18 +324,19 @@ const App = {
     const stats = Object.assign(Stats.base(), this.save.stats[labId] || {});
     const failsBefore = this.save.tried[labId][comboId] || 0;
     const known = !!(this.save.checked[labId] && this.save.checked[labId][comboId]);
+    if (known) return;
 
     stats.attempts++;
     if (result.solved) {
       stats.solved++;
       stats.streak++;
       stats.bestStreak = Math.max(stats.bestStreak, stats.streak);
-      if (!known && failsBefore === 0) stats.firstTry++;
+      if (failsBefore === 0) stats.firstTry++;
       if (!this.save.checked[labId]) this.save.checked[labId] = {};
       this.save.checked[labId][comboId] = true;
     } else {
       stats.streak = 0;
-      if (!known) this.save.tried[labId][comboId] = failsBefore + 1;
+      this.save.tried[labId][comboId] = failsBefore + 1;
     }
 
     this.save.stats[labId] = stats;
@@ -384,6 +389,41 @@ const App = {
 
     Levels.render();
     if (typeof Lab !== "undefined" && Lab.refreshStars) Lab.refreshStars();
+  },
+
+  handleEnter(e) {
+    if (e.key !== "Enter" || e.repeat || e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+    const tag = e.target && e.target.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA") return;
+    const intro = document.getElementById("studio-intro");
+    if (intro && !intro.classList.contains("hidden") && intro.style.display !== "none") return;
+    const action = this.enterAction();
+    if (!action) return;
+    e.preventDefault();
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    action();
+  },
+
+  enterAction() {
+    const isOpen = id => document.getElementById(id).classList.contains("open");
+    const isActive = id => document.getElementById(id).classList.contains("active");
+    const focused = document.activeElement;
+    const insideModal = focused && focused.closest && focused.closest(".modal-backdrop.open");
+    if (insideModal) return null;
+    if (["modal-settings", "modal-exit", "modal-submit", "modal-stats"].some(isOpen)) return null;
+    if (isOpen("modal-fact")) return () => Lab.closeFact();
+    if (isOpen("modal-stars")) return () => Lab.closeStars();
+    if (isOpen("modal-feedback")) return () => Lab.nextAfterFeedback();
+    if (this.isBusy) return null;
+    if (isActive("screen-lab")) {
+      if (Lab.busy) return null;
+      if (Lab.combo) return Lab.canCheck() ? () => Lab.checkAnswer() : null;
+      return Lab.selected.length === 2 ? () => Lab.createHypothesis() : null;
+    }
+    if (isActive("screen-tutorial") && this.currentTutorialStep !== this.inputStepIndex) {
+      return () => this.advance();
+    }
+    return null;
   },
 
   registerWorker() {
