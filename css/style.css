@@ -66,7 +66,7 @@ body {
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  padding: calc(12px + env(safe-area-inset-top, 0px)) 18px 18px;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) 18px calc(18px + env(safe-area-inset-bottom, 0px));
 }
 
 .logo-zone {
@@ -558,9 +558,11 @@ body {
   position: fixed;
   top: 0;
   left: 0;
+  box-sizing: border-box;
   width: 100vw;
   height: 100vh;
   height: 100dvh;
+  padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -589,8 +591,13 @@ body {
 }
 .modal-scroll {
   max-height: 92vh;
-  max-height: 92dvh;
+  max-height: calc(100dvh - 24px);
   overflow-y: auto;
+}
+.modal-card:not(.diary-card) > *,
+.tablet > *,
+.tablet-pane > * {
+  flex-shrink: 0;
 }
 .modal-backdrop.open .modal-card {
   transform: scale(1);
@@ -1290,7 +1297,7 @@ body.has-lab-bg #screen-lab {
   justify-content: center;
   align-items: center;
   gap: 12px;
-  padding: 10px 16px 16px;
+  padding: 10px 16px calc(16px + env(safe-area-inset-bottom, 0px));
 }
 .btn-create {
   flex: 0 1 380px;
@@ -1369,7 +1376,7 @@ body.has-lab-bg #screen-lab {
   100% {opacity: 1; transform: translateX(0);}
 }
 .tablet-pane {
-  padding: 0 16px 16px;
+  padding: 0 16px calc(16px + env(safe-area-inset-bottom, 0px));
 }
 .tablet {
   flex: 1;

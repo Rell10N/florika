@@ -20,6 +20,7 @@ const Vacuum = {
     wheelGapRatio: 0.05,
     wheelWidthRatio: 0.046,
     maxTilt: 7,
+    exitMode: "nearest",
     awayMinMs: 3000,
     awayMaxMs: 5000,
     returnPhaseFromRight: 0.47,
@@ -199,7 +200,11 @@ const Vacuum = {
     const e6 = this.place(layout.left6, layout.top, layout.w, layout.h, 0.05, 0.68);
     const s7 = this.place(left7, layout.top, layout.w, layout.h, 0.05, 0.04);
     const e7 = this.place(left7, layout.top, layout.w, layout.h, 0.35, 1.0);
-    this.exitSide = e7.x > layout.width / 2 ? 1 : -1;
+    const mode = this.settings.exitMode;
+    if (mode === "left") this.exitSide = -1;
+    else if (mode === "right") this.exitSide = 1;
+    else if (mode === "random") this.exitSide = Math.random() < 0.5 ? -1 : 1;
+    else this.exitSide = e7.x > layout.width / 2 ? 1 : -1;
     const exit = { x: this.exitSide > 0 ? layout.width + spriteRect.width + 80 : -spriteRect.width - 80, y: e7.y - layout.h * 0.2 };
 
     const ns = "http://www.w3.org/2000/svg";

@@ -183,7 +183,7 @@ const App = {
   combosReady: null,
   bgmTracks: [],
   isMusicStarted: false,
-  volumes: { music: 0.5, sfx: 0.5, voice: 0.5 },
+  volumes: Object.assign({}, GameConfig.audio.defaultVolumes),
 
   init() {
     this.loadSave();
@@ -605,7 +605,7 @@ const App = {
     source.playbackRate.value = (settings.rate || 1) * jitter;
 
     const gain = this.audioCtx.createGain();
-    gain.gain.value = this.volumes.sfx * GameConfig.audio.sfxMax * (settings.gain || 1);
+    gain.gain.value = this.volumes.sfx * GameConfig.audio.sfxMax * (GameConfig.audio.sfxGain[name] || 1) * (settings.gain || 1);
 
     source.connect(gain);
     gain.connect(this.audioCtx.destination);
@@ -726,7 +726,9 @@ const App = {
 
     this.bgmTracks.forEach((track, i) => {
       track.addEventListener("timeupdate", () => {
-        if (!track.crossfadeTriggered && track.duration && track.currentTime >= track.duration - 2) {
+        const pause = GameConfig.audio.trackBreaks[i];
+        const lead = (pause ? pause.outMs : 2000) / 1000;
+        if (!track.crossfadeTriggered && track.duration && track.currentTime >= track.duration - lead) {
           track.crossfadeTriggered = true;
           const nextIndex = (i + 1) % this.bgmTracks.length;
           this.bgmTracks[nextIndex].crossfadeTriggered = false;
@@ -763,7 +765,7 @@ const App = {
     const to = this.bgmTracks[(this.currentTrack + 1) % total];
     from.crossfadeTriggered = true;
     to.crossfadeTriggered = false;
-    this.crossfade(from, to);
+    this.crossfade(from, to, true);
   },
 
   startMusic() {
@@ -778,20 +780,42 @@ const App = {
     this.fadeAudio(track, 0, 1, 2500);
   },
 
-  crossfade(fadeOutTrack, fadeInTrack) {
-    this.fadeAudio(fadeOutTrack, fadeOutTrack.level, 0, 2000);
+  clearBreak() {
+    if (this.breakTimer) {
+      clearTimeout(this.breakTimer);
+      this.breakTimer = null;
+    }
+  },
+
+  crossfade(fadeOutTrack, fadeInTrack, quick) {
+    this.clearBreak();
+    const pause = quick ? null : GameConfig.audio.trackBreaks[this.bgmTracks.indexOf(fadeOutTrack)];
     this.currentTrack = this.bgmTracks.indexOf(fadeInTrack);
     this.updateTrackLabel();
-    const fresh = Loader.url(fadeInTrack.dataset.origin);
-    if (fadeInTrack.dataset.origin && fadeInTrack.getAttribute("src") !== fresh && fresh !== fadeInTrack.dataset.origin) {
-      fadeInTrack.src = fresh;
+
+    if (pause) {
+      this.fadeAudio(fadeOutTrack, fadeOutTrack.level, 0, pause.outMs);
+      this.breakTimer = setTimeout(() => {
+        this.breakTimer = null;
+        this.beginTrack(fadeInTrack, pause.inMs);
+      }, pause.outMs + pause.gapMs);
+      return;
     }
-    fadeInTrack.currentTime = 0;
-    fadeInTrack.level = 0;
-    fadeInTrack.crossfadeTriggered = false;
+    this.fadeAudio(fadeOutTrack, fadeOutTrack.level, 0, 2000);
+    this.beginTrack(fadeInTrack, 1500);
+  },
+
+  beginTrack(track, fadeMs) {
+    const fresh = Loader.url(track.dataset.origin);
+    if (track.dataset.origin && track.getAttribute("src") !== fresh && fresh !== track.dataset.origin) {
+      track.src = fresh;
+    }
+    track.currentTime = 0;
+    track.level = 0;
+    track.crossfadeTriggered = false;
     this.applyMusicVolume();
-    fadeInTrack.play().catch(() => {});
-    this.fadeAudio(fadeInTrack, 0, 1, 1500);
+    track.play().catch(() => {});
+    this.fadeAudio(track, 0, 1, fadeMs);
   },
 
   fadeAudio(audioEl, startLevel, endLevel, duration) {
@@ -925,6 +949,10 @@ const App = {
   openSettings() {
     this.syncSettingsUI();
     this.openModal("modal-settings");
+    requestAnimationFrame(() => {
+      const card = document.querySelector("#modal-settings .modal-scroll");
+      if (card) card.scrollTop = card.scrollHeight;
+    });
   },
 
   syncSettingsUI() {

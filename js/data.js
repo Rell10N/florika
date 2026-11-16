@@ -35,8 +35,18 @@ const GameConfig = {
     useLabBackground: false
   },
   audio: {
+    defaultVolumes: { music: 0.4, sfx: 0.2, voice: 0.7 },
     musicMax: 0.12,
     sfxMax: 0.6,
+    sfxGain: {
+      flask_pick: 1, flask_drop: 1, link: 1, create: 1.7, tablet_open: 1, verdict: 1, option: 1,
+      hint: 1, win: 1, partial: 1, fail: 1, modal_open: 1, modal_close: 1, fact_open: 1,
+      star: 1, fanfare: 1, button: 1, back: 1, locked: 1
+    },
+    trackBreaks: {
+      2: { outMs: 1500, gapMs: 1500, inMs: 1000 },
+      3: { outMs: 2000, gapMs: 2000, inMs: 1200 }
+    },
     labMusicScale: 0.88,
     speechDuckScale: 0.6,
     sfxNames: [

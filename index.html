@@ -38,18 +38,18 @@
       </div>
       <div class="vol-row">
         <span class="vol-label">Музыка</span>
-        <input type="range" class="vol-range" id="vol-music" min="0" max="100" step="1" value="50">
-        <span class="vol-value" id="vol-music-value">50%</span>
+        <input type="range" class="vol-range" id="vol-music" min="0" max="100" step="1" value="40">
+        <span class="vol-value" id="vol-music-value">40%</span>
       </div>
       <div class="vol-row">
         <span class="vol-label">Звуки</span>
-        <input type="range" class="vol-range" id="vol-sfx" min="0" max="100" step="1" value="50">
-        <span class="vol-value" id="vol-sfx-value">50%</span>
+        <input type="range" class="vol-range" id="vol-sfx" min="0" max="100" step="1" value="20">
+        <span class="vol-value" id="vol-sfx-value">20%</span>
       </div>
       <div class="vol-row">
         <span class="vol-label">Голос Флори</span>
-        <input type="range" class="vol-range" id="vol-voice" min="0" max="100" step="1" value="50">
-        <span class="vol-value" id="vol-voice-value">50%</span>
+        <input type="range" class="vol-range" id="vol-voice" min="0" max="100" step="1" value="70">
+        <span class="vol-value" id="vol-voice-value">70%</span>
       </div>
       <div class="modal-row">
         <span class="modal-label track-label" id="track-label">Трек 1 из 3</span>
@@ -76,7 +76,7 @@
         <p class="modal-note">С 85% открывается сдача данных. Реальный прогресс игрока не меняется.</p>
       </div>
       <button class="btn-danger-3d" id="btn-reset-progress" onclick="App.resetProgress()">СБРОСИТЬ ПРОГРЕСС</button>
-      <button class="btn-primary-3d" onclick="App.closeModal('modal-settings')">ГОТОВО</button>
+      <button class="btn-primary-3d" data-sfx="back" onclick="App.closeModal('modal-settings')">ГОТОВО</button>
     </div>
   </div>
 
