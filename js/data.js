@@ -3,31 +3,36 @@ const GameConfig = {
   starThresholds: [10, 20, 28],
   finalThreshold: 85,
   devCode: "Rell10N",
-  imageExt: "png",
+  imageExt: "webp",
   assets: {
     menu: {
       shared: [
-        "assets/samples/logo_banner.png",
-        "assets/flori/flori_hello.png",
-        "assets/samples/toy_vacuum.png"
+        "assets/samples/logo_banner.webp",
+        "assets/flori/flori_hello.webp",
+        "assets/samples/toy_vacuum.webp"
       ],
-      compact: ["assets/samples/bg_menu.png", "assets/samples/bushes_bg.png"],
-      wide: ["assets/samples/bg_menu2.png", "assets/samples/bushes_bg2.png"]
+      compact: ["assets/samples/bg_menu.webp", "assets/samples/bushes_bg.webp"],
+      wide: ["assets/samples/bg_menu2.webp", "assets/samples/bushes_bg2.webp"]
     },
     story: [
-      "assets/flori/flori_panic.png",
-      "assets/flori/flori_glitch.png",
-      "assets/flori/flori_think.png",
-      "assets/flori/flori_talk.png",
-      "assets/flori/flori_win.png",
-      "assets/flori/flori_guide.png"
+      "assets/flori/flori_panic.webp",
+      "assets/flori/flori_glitch.webp",
+      "assets/flori/flori_think.webp",
+      "assets/flori/flori_talk.webp",
+      "assets/flori/flori_win.webp",
+      "assets/flori/flori_guide.webp"
     ],
     voice: "assets/audio/voice.mp3",
-    rest: ["assets/samples/mailia_icon.png", "assets/samples/bg_lab.png"],
+    rest: ["assets/samples/mailia_icon.webp"],
     music: [
       "assets/audio/bgm_the_empty_lab.mp3",
-      "assets/audio/bgm_gears_and_sprouts.mp3"
-    ]
+      "assets/audio/bgm_quiet_workshop.mp3",
+      "assets/audio/bgm_gears_and_sprouts.mp3",
+      "assets/audio/bgm_the_eureka_moment.mp3"
+    ],
+    musicNames: ["Пустая лаборатория", "Тихая мастерская", "Шестерёнки и ростки", "Момент эврики"],
+    useComboIcons: false,
+    useLabBackground: false
   },
   audio: {
     musicMax: 0.12,
@@ -86,13 +91,44 @@ const GameConfig = {
 
 const GameData = {
   nameMessages: {
-    digits: "Ой, в имени цифры? Давай только буквами!",
-    symbols: "Тут какие-то значки. Напиши имя только буквами.",
-    words: "Слишком много слов! Напиши одно имя, например Маша или Артём.",
-    short: "Это слишком коротко для имени. Попробуй ещё раз!",
-    gibberish: "Хм, это не похоже на имя. Попробуй ещё раз!",
-    rude: "Ой, так имя называть не стоит. Напиши другое, пожалуйста!",
-    pick: "Выбери, как к тебе обращаться."
+    digits: [
+      "Цифры? Я люблю считать, но имя пишут буквами. Попробуй ещё раз!",
+      "Ого, это номер, а не имя! Номера в моей лаборатории бывают только у колб.",
+      "Мои датчики видят цифры. Давай ещё раз, только буквами!"
+    ],
+    sixtyseven: ["Шестьдесят семь? Звучит как секретный код! Но имя лучше написать буквами."],
+    zero: ["Ноль? Так не называют даже робота-пылесоса. Напиши настоящее имя!"],
+    symbols: [
+      "Тут какие-то загадочные значки. Мои датчики в замешательстве! Напиши имя буквами.",
+      "Хм, это похоже на шифр. Расшифруй его обратно в имя, пожалуйста!"
+    ],
+    words: [
+      "Так много слов! Мой пропеллер запутался. Нужно одно имя.",
+      "Ого, целое предложение! Давай только имя, например Маша или Артём."
+    ],
+    short: [
+      "Совсем коротко! Добавь хотя бы пару букв, пожалуйста.",
+      "Это короче моего пропеллера! Попробуй имя подлиннее."
+    ],
+    gibberish: [
+      "Хм, мои датчики не узнают такое имя. Это точно не кот пробежал по клавиатуре?",
+      "Бззз... Не могу прочитать! Напиши имя настоящими буквами, пожалуйста.",
+      "Похоже, это секретный язык роботов. Но мне нужно твоё настоящее имя!"
+    ],
+    rude: [
+      "Ой-ой! От таких слов мой пропеллер крутится в обратную сторону. Давай другое имя!",
+      "Тс-с, давай без таких слов. Напиши настоящее имя, и мы подружимся!",
+      "Это не имя, а ворчание. Попробуй ещё разок, по-доброму!"
+    ],
+    flori: [
+      "Это же моё имя! Давай придумаем тебе другое, чтобы мы не путались.",
+      "Флори уже есть, и это я! А как зовут тебя?"
+    ],
+    mailia: ["Мэйлия это наш робот! Она сейчас спит. А как зовут тебя?"],
+    pick: [
+      "Выбери, как к тебе обращаться.",
+      "Нажми на одну из кнопок, чтобы я знал, как к тебе обращаться."
+    ]
   },
   loading: {
     menu: "Флори включает свет в лаборатории...",
@@ -104,51 +140,51 @@ const GameData = {
   },
   prologue: [
     {
-      sprite: "assets/flori/flori_panic.png",
+      sprite: "assets/flori/flori_panic.webp",
       text: "Ой-ой-ой! Беда, беда! В лабораторию ударила молния, и всё пошло наперекосяк! Сработал аварийный протокол, все срочно эвакуируются!"
     },
     {
-      sprite: "assets/flori/flori_glitch.png",
+      sprite: "assets/flori/flori_glitch.webp",
       text: "Наша Мэйлия получила сильный сбой! Теперь она путает правду с выдумками, а проверка её выводов заблокирована. Что же делать, что же делать..."
     },
     {
-      sprite: "assets/flori/flori_hello.png",
+      sprite: "assets/flori/flori_hello.webp",
       text: "Ой! Подожди-ка... А кто это здесь? У тебя горит активная учебная сессия! Значит, ты из учебной программы нашей лаборатории!"
     },
     {
-      sprite: "assets/flori/flori_win.png",
+      sprite: "assets/flori/flori_win.webp",
       text: "Ура-ура! Какая удача! Я нашёл себе {помощника|помощницу}, и как раз из учебной программы! Теперь у нас точно всё получится!"
     },
     {
-      sprite: "assets/flori/flori_think.png",
+      sprite: "assets/flori/flori_think.webp",
       text: "Давай знакомиться! Я Флори, а тебя зовут... зовут... э-э-э... Ой! А я ведь совсем не знаю твоего имени!"
     },
     {
       type: "input",
-      sprite: "assets/flori/flori_talk.png",
+      sprite: "assets/flori/flori_talk.webp",
       text: "А как тебя зовут?"
     },
     {
       type: "reaction",
       named: {
-        sprite: "assets/flori/flori_win.png",
+        sprite: "assets/flori/flori_win.webp",
         text: "{who}! Звучит просто великолепно! Очень приятно познакомиться!"
       },
       anonymous: {
-        sprite: "assets/flori/flori_think.png",
+        sprite: "assets/flori/flori_think.webp",
         text: "Ого, имя вводить не хочешь? Ничего страшного! Тогда буду звать тебя просто {title}. Звучит солидно!"
       }
     },
     {
-      sprite: "assets/flori/flori_talk.png",
+      sprite: "assets/flori/flori_talk.webp",
       text: "Слушай внимательно, {who}. Мэйлия по-прежнему придумывает гипотезы, но из-за аварии не может сама проверить, правда это или нет. А роботам трогать защиту строго запрещено."
     },
     {
-      sprite: "assets/flori/flori_guide.png",
+      sprite: "assets/flori/flori_guide.webp",
       text: "Поэтому нужен настоящий человек со здравым смыслом! Ты будешь проверять идеи Мэйлии: возможно такое или нет, и почему. А я буду рядом, подскажу и расскажу много интересного!"
     },
     {
-      sprite: "assets/flori/flori_guide.png",
+      sprite: "assets/flori/flori_guide.webp",
       text: "Скорее в безопасную часть лаборатории, к проверочному терминалу! Держись за меня крепче, {who}, полетели!"
     }
   ],
@@ -156,20 +192,20 @@ const GameData = {
     main: {
       title: "Данные сданы",
       lines: [
-        { sprite: "assets/flori/flori_guide.png", text: "Терминал принимает данные... Проверено {percent}% знаний! Отличная работа, {who}!" },
-        { sprite: "assets/flori/flori_talk.png", text: "Защита снимает блокировку. Взрослые сотрудники уже бегут чинить систему, а Мэйлия вот-вот проснётся." },
-        { sprite: "assets/flori/flori_hello.png", speaker: "Мэйлия", text: "Загрузка завершена. Спасибо, {who}! Теперь я умею отличать правду от выдумки и проверять свои идеи." },
-        { sprite: "assets/flori/flori_win.png", text: "Безопасный режим восстановлен! Но в других лабораториях ещё много непроверенных идей. Вернёшься помогать?" }
+        { sprite: "assets/flori/flori_guide.webp", text: "Терминал принимает данные... Проверено {percent}% знаний! Отличная работа, {who}!" },
+        { sprite: "assets/flori/flori_talk.webp", text: "Защита снимает блокировку. Взрослые сотрудники уже бегут чинить систему, а Мэйлия вот-вот проснётся." },
+        { sprite: "assets/flori/flori_hello.webp", speaker: "Мэйлия", text: "Загрузка завершена. Спасибо, {who}! Теперь я умею отличать правду от выдумки и проверять свои идеи." },
+        { sprite: "assets/flori/flori_win.webp", text: "Безопасный режим восстановлен! Но в других лабораториях ещё много непроверенных идей. Вернёшься помогать?" }
       ]
     },
     golden: {
       title: "Золотая концовка",
       lines: [
-        { sprite: "assets/flori/flori_win.png", text: "Не может быть! {percent}%! {who}, ты проверил{|а} абсолютно всё!" },
-        { sprite: "assets/flori/flori_talk.png", text: "Все лаборатории проверены до последней гипотезы. В базе знаний не осталось ни одной выдумки!" },
-        { sprite: "assets/flori/flori_hello.png", speaker: "Мэйлия", text: "{who}, я сохранила для тебя особую запись: «Самый внимательный исследователь». Вы с Флори вернули мне не только знания, но и здравый смысл." },
-        { sprite: "assets/flori/flori_guide.png", text: "Мэйлия просит передать: теперь она сама спрашивает себя «а почему?». И ждёт, когда ты придёшь проверять её новые идеи!" },
-        { sprite: "assets/flori/flori_win.png", text: "Золотая колба твоя! Ты настоящий герой лаборатории!" }
+        { sprite: "assets/flori/flori_win.webp", text: "Не может быть! {percent}%! {who}, ты проверил{|а} абсолютно всё!" },
+        { sprite: "assets/flori/flori_talk.webp", text: "Все лаборатории проверены до последней гипотезы. В базе знаний не осталось ни одной выдумки!" },
+        { sprite: "assets/flori/flori_hello.webp", speaker: "Мэйлия", text: "{who}, я сохранила для тебя особую запись: «Самый внимательный исследователь». Вы с Флори вернули мне не только знания, но и здравый смысл." },
+        { sprite: "assets/flori/flori_guide.webp", text: "Мэйлия просит передать: теперь она сама спрашивает себя «а почему?». И ждёт, когда ты придёшь проверять её новые идеи!" },
+        { sprite: "assets/flori/flori_win.webp", text: "Золотая колба твоя! Ты настоящий герой лаборатории!" }
       ],
       badge: {
         title: "Золотая колба",
@@ -181,12 +217,12 @@ const GameData = {
     finale: {
       title: "Данные сданы",
       text: "Мэйлия получает доступ к проверенной базе знаний. Сюжетный финал скоро появится!",
-      sprite: "assets/flori/flori_win.png"
+      sprite: "assets/flori/flori_win.webp"
     },
     farewell: {
       title: "До встречи!",
       text: "Спасибо за игру! Эту вкладку можно закрыть. Флори будет ждать тебя в лаборатории.",
-      sprite: "assets/flori/flori_hello.png"
+      sprite: "assets/flori/flori_hello.webp"
     }
   }
 };

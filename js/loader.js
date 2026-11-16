@@ -73,6 +73,7 @@ const Loader = {
   },
 
   appendIcons() {
+    if (!GameConfig.assets.useComboIcons) return Promise.resolve();
     const ready = App.combosReady || Promise.resolve();
     return ready.then(() => {
       const items = App.combos.map((combo, i) => {

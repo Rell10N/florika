@@ -286,6 +286,7 @@ const Lab = {
   },
 
   iconPath(combo) {
+    if (!GameConfig.assets.useComboIcons) return "";
     const icon = combo.icon;
     if (icon) {
       return /[\/.]/.test(icon) ? icon : "assets/ico/" + icon + "." + GameConfig.imageExt;
@@ -328,11 +329,17 @@ const Lab = {
     pair.style.visibility = "";
 
     const img = document.getElementById("hyp-img");
-    img.style.display = "";
-    img.onload = () => {
-      pair.style.visibility = "hidden";
-    };
-    img.src = this.iconPath(combo);
+    const iconSrc = this.iconPath(combo);
+    if (iconSrc) {
+      img.style.display = "";
+      img.onload = () => {
+        pair.style.visibility = "hidden";
+      };
+      img.src = iconSrc;
+    } else {
+      img.style.display = "none";
+      img.removeAttribute("src");
+    }
 
     const checked = App.save.checked[this.labId];
     document.getElementById("chip-done").classList.toggle("is-hidden", !(checked && checked[combo.id]));

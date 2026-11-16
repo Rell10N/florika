@@ -41,6 +41,11 @@ const Name = {
   validate(raw) {
     const text = String(raw).replace(/\s+/g, " ").trim();
     if (!text) return "";
+    const flat = text.toLowerCase().replace(/ё/g, "е");
+    if (flat === "флори" || flat === "flori") return "flori";
+    if (["мэйлия", "мейлия", "mailia", "maylia"].indexOf(flat) >= 0) return "mailia";
+    if (/^6\s*7$/.test(text)) return "sixtyseven";
+    if (/^0+$/.test(text)) return "zero";
     if (/\d/.test(text)) return "digits";
     if (!/^[\p{L}][\p{L}'’\- ]*$/u.test(text)) return "symbols";
     if (text.split(" ").length > 2) return "words";
@@ -48,8 +53,8 @@ const Name = {
     if (letters.length < 2) return "short";
     if (/(.)\1{3,}/iu.test(letters)) return "gibberish";
     if (letters.length >= 3 && !new RegExp("[" + this.vowels + "]", "iu").test(letters)) return "gibberish";
-    const flat = letters.toLowerCase().replace(/ё/g, "е");
-    if (this.rudeStems().some(stem => flat.indexOf(stem) >= 0)) return "rude";
+    const lettersFlat = letters.toLowerCase().replace(/ё/g, "е");
+    if (this.rudeStems().some(stem => lettersFlat.indexOf(stem) >= 0)) return "rude";
     return "";
   },
 

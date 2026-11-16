@@ -152,6 +152,7 @@ const App = {
   playerName: "",
   gender: "m",
   genderChoice: null,
+  currentTrack: 0,
   currentTutorialStep: 0,
   maxVisitedStep: -1,
   inputStepIndex: -1,
@@ -196,6 +197,7 @@ const App = {
     this.setupNameInput();
     this.setupDevInputs();
     this.setupFullscreen();
+    document.body.classList.toggle("has-lab-bg", !!GameConfig.assets.useLabBackground);
     this.registerWorker();
     this.loadCombos();
     Loader.run();
@@ -435,8 +437,15 @@ const App = {
 
   registerWorker() {
     if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
+    const hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (hadController && !Loader.entered && !this.reloadedForUpdate) {
+        this.reloadedForUpdate = true;
+        location.reload();
+      }
+    });
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("sw.js").catch(() => {});
+      navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).catch(() => {});
     });
   },
 
@@ -706,18 +715,16 @@ const App = {
   },
 
   initBGM() {
-    this.bgmTracks = [
-      new Audio(Loader.url(GameConfig.assets.music[0])),
-      new Audio(Loader.url(GameConfig.assets.music[1]))
-    ];
-    this.bgmTracks.forEach((track, i) => {
-      track.dataset.origin = GameConfig.assets.music[i];
+    const sources = GameConfig.assets.music;
+    this.bgmTracks = sources.map(src => {
+      const track = new Audio(Loader.url(src));
+      track.dataset.origin = src;
+      track.level = 0;
+      track.crossfadeTriggered = false;
+      return track;
     });
 
     this.bgmTracks.forEach((track, i) => {
-      track.level = 0;
-      track.crossfadeTriggered = false;
-
       track.addEventListener("timeupdate", () => {
         if (!track.crossfadeTriggered && track.duration && track.currentTime >= track.duration - 2) {
           track.crossfadeTriggered = true;
@@ -725,11 +732,38 @@ const App = {
           this.bgmTracks[nextIndex].crossfadeTriggered = false;
           this.crossfade(track, this.bgmTracks[nextIndex]);
         }
-
       });
     });
 
+    this.currentTrack = 0;
     this.applySoundState();
+  },
+
+  trackLabel() {
+    const names = GameConfig.assets.musicNames || [];
+    const index = this.currentTrack || 0;
+    const total = GameConfig.assets.music.length;
+    return "Трек " + (index + 1) + " из " + total + (names[index] ? ": " + names[index] : "");
+  },
+
+  updateTrackLabel() {
+    const el = document.getElementById("track-label");
+    if (el) el.textContent = this.trackLabel();
+  },
+
+  nextTrack() {
+    if (!this.isMusicStarted) {
+      this.startMusic();
+      this.updateTrackLabel();
+      return;
+    }
+    const total = this.bgmTracks.length;
+    if (total < 2) return;
+    const from = this.bgmTracks[this.currentTrack];
+    const to = this.bgmTracks[(this.currentTrack + 1) % total];
+    from.crossfadeTriggered = true;
+    to.crossfadeTriggered = false;
+    this.crossfade(from, to);
   },
 
   startMusic() {
@@ -746,6 +780,8 @@ const App = {
 
   crossfade(fadeOutTrack, fadeInTrack) {
     this.fadeAudio(fadeOutTrack, fadeOutTrack.level, 0, 2000);
+    this.currentTrack = this.bgmTracks.indexOf(fadeInTrack);
+    this.updateTrackLabel();
     const fresh = Loader.url(fadeInTrack.dataset.origin);
     if (fadeInTrack.dataset.origin && fadeInTrack.getAttribute("src") !== fresh && fresh !== fadeInTrack.dataset.origin) {
       fadeInTrack.src = fresh;
@@ -894,6 +930,7 @@ const App = {
   syncSettingsUI() {
     this.updateSoundToggle();
     this.syncVolumeUI();
+    this.updateTrackLabel();
 
     const codeRow = document.getElementById("dev-code-row");
     const panel = document.getElementById("dev-panel");
@@ -1235,6 +1272,18 @@ const App = {
     });
   },
 
+  nameMessage(key) {
+    const pool = GameData.nameMessages[key] || [];
+    if (!pool.length) return "";
+    this.lastNameMessage = this.lastNameMessage || {};
+    let pick = pool[Math.floor(Math.random() * pool.length)];
+    if (pool.length > 1 && pick === this.lastNameMessage[key]) {
+      pick = pool[(pool.indexOf(pick) + 1) % pool.length];
+    }
+    this.lastNameMessage[key] = pick;
+    return pick;
+  },
+
   showNameError(message) {
     const el = document.getElementById("name-error");
     const input = document.getElementById("player-name-input");
@@ -1358,14 +1407,14 @@ const App = {
     if (!input) return true;
     const problem = Name.validate(input.value);
     if (problem && strict) {
-      this.showNameError(GameData.nameMessages[problem]);
+      this.showNameError(this.nameMessage(problem));
       return false;
     }
     const name = problem ? "" : Name.format(input.value);
     let gender = this.genderChoice || Name.guess(name);
     if (!gender) {
       if (name && strict) {
-        this.showNameError(GameData.nameMessages.pick);
+        this.showNameError(this.nameMessage("pick"));
         return false;
       }
       gender = "m";

@@ -8,16 +8,13 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="assets/icons/favicon.png">
   <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
-  <link rel="preload" as="image" href="assets/samples/bg_menu.png" media="(max-aspect-ratio: 7/5), (max-width: 639px)" fetchpriority="high">
-  <link rel="preload" as="image" href="assets/samples/bg_menu2.png" media="(min-width: 640px) and (min-aspect-ratio: 7/5)" fetchpriority="high">
-  <link rel="preload" as="image" href="assets/samples/logo_banner.png">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
   <div class="studio-intro" id="studio-intro">
     <div class="studio-glow"></div>
-    <img src="assets/samples/studio_icon.png" alt="R&amp;G Studio" class="studio-icon" onerror="this.style.display='none'; document.getElementById('studio-fallback').style.display='block';">
+    <img src="assets/samples/studio_icon.webp" alt="R&amp;G Studio" class="studio-icon" onerror="this.style.display='none'; document.getElementById('studio-fallback').style.display='block';">
     <div class="studio-fallback" id="studio-fallback">R&amp;G Studio</div>
     <div class="loader-panel" id="loader-panel">
       <div class="loader-status" id="loader-status">Флори включает свет в лаборатории...</div>
@@ -53,6 +50,10 @@
         <span class="vol-label">Голос Флори</span>
         <input type="range" class="vol-range" id="vol-voice" min="0" max="100" step="1" value="50">
         <span class="vol-value" id="vol-voice-value">50%</span>
+      </div>
+      <div class="modal-row">
+        <span class="modal-label track-label" id="track-label">Трек 1 из 3</span>
+        <button class="btn-toggle" type="button" onclick="App.nextTrack()">ДАЛЕЕ</button>
       </div>
       <div class="modal-row" id="row-fullscreen">
         <span class="modal-label">На весь экран</span>
@@ -113,7 +114,7 @@
   <div class="modal-backdrop modal-result" id="modal-feedback" role="dialog" aria-modal="true" aria-labelledby="feedback-title">
     <div class="result-stage" data-side="left">
       <div class="result-flori">
-        <img src="assets/flori/flori_talk.png" alt="Флори" id="feedback-img">
+        <img src="assets/flori/flori_talk.webp" alt="Флори" id="feedback-img">
       </div>
       <div class="result-card" id="feedback-card" data-tone="win">
         <div class="result-head">
@@ -142,7 +143,7 @@
   <div class="modal-backdrop modal-result modal-fact" id="modal-fact" role="dialog" aria-modal="true" aria-labelledby="fact-title" onclick="Lab.closeFact()">
     <div class="result-stage" data-side="right" onclick="event.stopPropagation()">
       <div class="result-flori">
-        <img src="assets/flori/flori_guide.png" alt="Флори">
+        <img src="assets/flori/flori_guide.webp" alt="Флори">
       </div>
       <div class="result-card fact-card" data-tone="fact">
         <div class="fact-ribbon"><span>Интересный факт</span></div>
@@ -171,7 +172,7 @@
   <div class="modal-backdrop modal-result modal-stars" id="modal-stars" role="dialog" aria-modal="true" aria-labelledby="stars-title">
     <div class="result-stage" data-side="left">
       <div class="result-flori">
-        <img src="assets/flori/flori_win.png" alt="Флори">
+        <img src="assets/flori/flori_win.webp" alt="Флори">
       </div>
       <div class="result-card" data-tone="win">
         <div class="result-head">
@@ -196,7 +197,7 @@
         <svg class="diary-book" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18 2H8a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h12V4a2 2 0 0 0-2-2zm-1 13H8a1 1 0 0 0-1 1V5a1 1 0 0 1 1-1h9v11zM8 18h11v2H8a1 1 0 0 1 0-2z"/></svg>
         <h2 class="diary-title" id="diary-heading">Дневник открытий</h2>
         <button class="btn-round diary-x" type="button" aria-label="Закрыть" data-sfx="none" onclick="Diary.close()">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3z"/></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg>
         </button>
       </div>
       <div class="diary-tabs" role="tablist">
@@ -216,7 +217,7 @@
       </button>
 
       <div class="logo-zone">
-        <img src="assets/samples/logo_banner.png" alt="Флорика" class="main-logo-img" id="logo-img" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
+        <img src="assets/samples/logo_banner.webp" alt="Флорика" class="main-logo-img" id="logo-img" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
         <div class="logo-fallback" id="logo-fallback">
           <h1>ФЛОРИКА</h1>
           <span>Спасение логики Мэйлии</span>
@@ -224,11 +225,11 @@
       </div>
 
       <div class="flori-stage">
-        <img src="assets/flori/flori_hello.png" alt="Флори приветствует" class="flori-hero-sprite">
+        <img src="assets/flori/flori_hello.webp" alt="Флори приветствует" class="flori-hero-sprite">
       </div>
 
       <div class="hills-vacuum-track">
-        <img src="assets/samples/toy_vacuum.png" alt="Робот-пылесос" class="vacuum-sprite" id="vacuum-img" onerror="this.style.display='none';">
+        <img src="assets/samples/toy_vacuum.webp" alt="Робот-пылесос" class="vacuum-sprite" id="vacuum-img" onerror="this.style.display='none';">
       </div>
 
       <div class="bushes-foreground-layer"></div>
@@ -256,7 +257,7 @@
       </button>
 
       <div class="tutorial-stage" id="tutorial-stage">
-        <img src="assets/flori/flori_panic.png" alt="Флори" class="tutorial-flori-sprite" id="tutorial-flori-img">
+        <img src="assets/flori/flori_panic.webp" alt="Флори" class="tutorial-flori-sprite" id="tutorial-flori-img">
       </div>
 
       <div class="dialogue-box" id="dialogue-box">
@@ -287,7 +288,7 @@
     <section class="screen" id="screen-levels">
 
       <div class="top-bar levels-top">
-        <img src="assets/samples/logo_banner.png" alt="Флорика" class="levels-logo" onerror="this.style.display='none'; document.getElementById('levels-logo-text').style.display='block';">
+        <img src="assets/samples/logo_banner.webp" alt="Флорика" class="levels-logo" onerror="this.style.display='none'; document.getElementById('levels-logo-text').style.display='block';">
         <span class="levels-logo-text" id="levels-logo-text">ФЛОРИКА</span>
 
         <div class="mailia-bar">
@@ -295,7 +296,7 @@
           <span class="mailia-percent">0%</span>
           <span class="demo-tag">ДЕМО</span>
           <div class="mailia-avatar">
-            <img src="assets/samples/mailia_icon.png" alt="" onerror="this.style.display='none'">
+            <img src="assets/samples/mailia_icon.webp" alt="" onerror="this.style.display='none'">
             <span>М</span>
           </div>
         </div>
@@ -308,7 +309,7 @@
 
       <div class="levels-main">
         <div class="levels-flori">
-          <img src="assets/flori/flori_guide.png" alt="Флори" class="levels-flori-img">
+          <img src="assets/flori/flori_guide.webp" alt="Флори" class="levels-flori-img">
         </div>
 
         <div class="levels-center">
@@ -343,7 +344,7 @@
           <span class="mailia-percent">0%</span>
           <span class="demo-tag">ДЕМО</span>
           <div class="mailia-avatar">
-            <img src="assets/samples/mailia_icon.png" alt="" onerror="this.style.display='none'">
+            <img src="assets/samples/mailia_icon.webp" alt="" onerror="this.style.display='none'">
             <span>М</span>
           </div>
         </div>
@@ -448,7 +449,7 @@
     <section class="screen" id="screen-stub">
 
       <div class="tutorial-stage">
-        <img src="assets/flori/flori_guide.png" alt="Флори" class="tutorial-flori-sprite" id="stub-flori-img">
+        <img src="assets/flori/flori_guide.webp" alt="Флори" class="tutorial-flori-sprite" id="stub-flori-img">
       </div>
 
       <div class="dialogue-box">

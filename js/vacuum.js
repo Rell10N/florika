@@ -13,13 +13,18 @@ const Vacuum = {
     startSpeed: 130,
     topSpeed: 500,
     rampSeconds: 1.2,
-    digitHeightCompact: 96,
+    digitHeightCompact: 62,
     digitHeightWide: 150,
     shiftX: 0,
     shiftY: 0,
     wheelGapRatio: 0.05,
     wheelWidthRatio: 0.046,
-    maxTilt: 7
+    maxTilt: 7,
+    awayMinMs: 3000,
+    awayMaxMs: 5000,
+    returnPhaseFromRight: 0.47,
+    patrolSeconds: 34,
+    compactTopOffset: 34
   },
 
   init() {
@@ -99,10 +104,9 @@ const Vacuum = {
       else centerX = actionsRect.right + Math.max(0, leftFree) / 2;
       topAbs = window.innerHeight - height - Math.max(60, window.innerHeight * 0.09);
     } else {
-      const free = actionsRect.top - floriRect.bottom - 26;
-      height = Math.max(70, Math.min(height, free));
-      centerX = window.innerWidth * 0.44;
-      topAbs = floriRect.bottom + 10;
+      const total = height * 0.62 * 2.5;
+      centerX = Math.max(total / 2 + 8, floriRect.left + 8 - total / 2);
+      topAbs = trackRect.top + settings.compactTopOffset;
     }
 
     const w = height * 0.62;
@@ -195,7 +199,8 @@ const Vacuum = {
     const e6 = this.place(layout.left6, layout.top, layout.w, layout.h, 0.05, 0.68);
     const s7 = this.place(left7, layout.top, layout.w, layout.h, 0.05, 0.04);
     const e7 = this.place(left7, layout.top, layout.w, layout.h, 0.35, 1.0);
-    const exit = { x: layout.width + spriteRect.width + 80, y: e7.y - layout.h * 0.2 };
+    this.exitSide = e7.x > layout.width / 2 ? 1 : -1;
+    const exit = { x: this.exitSide > 0 ? layout.width + spriteRect.width + 80 : -spriteRect.width - 80, y: e7.y - layout.h * 0.2 };
 
     const ns = "http://www.w3.org/2000/svg";
     this.svg = document.createElementNS(ns, "svg");
@@ -211,12 +216,11 @@ const Vacuum = {
       this.makeDrawn(this.sixPath(layout.left6, layout.top, layout.w, layout.h), layout.h),
       this.makeMove(this.curve(e6, { x: 0, y: 1 }, s7, dir7)),
       this.makeDrawn(this.sevenPath(left7, layout.top, layout.w, layout.h), layout.h),
-      this.makeMove(this.curve(e7, out7, exit, { x: 1, y: 0 }))
+      this.makeMove(this.curve(e7, out7, exit, { x: this.exitSide, y: 0 }))
     ];
     this.total = this.segments.reduce((sum, seg) => sum + seg.length, 0);
 
     this.sprite.style.animation = "none";
-    this.track.style.zIndex = "5";
     this.track.style.overflow = "visible";
 
     this.dist = 0;
@@ -285,9 +289,10 @@ const Vacuum = {
 
   finish() {
     this.frame = null;
-    this.sprite.style.animation = "";
-    this.sprite.style.transform = "";
+    this.sprite.style.transform = "translate3d(" + (this.exitSide > 0 ? "130vw" : "-130vw") + ",0,0)";
     this.state = "visible";
+    const away = this.settings.awayMinMs + Math.random() * (this.settings.awayMaxMs - this.settings.awayMinMs);
+    this.later(() => this.comeBack(), away);
     this.later(() => {
       this.state = "fading";
       if (this.svg) this.svg.classList.add("is-fading");
@@ -295,10 +300,17 @@ const Vacuum = {
     }, this.settings.holdMs);
   },
 
+  comeBack() {
+    const settings = this.settings;
+    const delay = this.exitSide > 0 ? -settings.returnPhaseFromRight * settings.patrolSeconds : 0;
+    this.sprite.style.transform = "";
+    this.sprite.style.animation = "";
+    this.sprite.style.animationDelay = delay + "s";
+  },
+
   cleanup() {
     if (this.svg && this.svg.parentNode) this.svg.parentNode.removeChild(this.svg);
     this.svg = null;
-    this.track.style.zIndex = "";
     this.track.style.overflow = "";
     this.state = "cooldown";
     this.later(() => {
